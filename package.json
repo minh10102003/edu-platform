@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "clean-products": "node scripts/clean-products.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",

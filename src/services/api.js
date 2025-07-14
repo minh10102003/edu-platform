@@ -1,229 +1,256 @@
-import { mockProducts } from '../utils/mockData';
+// src/services/api.js
+
 import { storage } from '../utils/storage';
 
-// Simulate API delay
+// Simulate API delay (in ms)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Simulate API failure rate (for testing error handling)
-const shouldFail = () => Math.random() < 0.1; // 10% failure rate
+// Simulate API failure rate (e.g. for AI suggestions)
+const shouldFail = () => Math.random() < 0.1; // 10% chance to fail
+
+// In-memory cache of products to avoid refetching
+let _productsCache = null;
+
+/**
+ * Internal helper: fetch and cache products.json
+ */
+async function fetchProducts() {
+  if (_productsCache === null) {
+    const response = await fetch('/api/products.json');
+    if (!response.ok) {
+      throw new Error('Không thể tải danh sách khóa học');
+    }
+    _productsCache = await response.json();
+  }
+  return _productsCache;
+}
 
 export const api = {
-  // Get all products
+  /**
+   * Lấy danh sách tất cả sản phẩm
+   */
   getProducts: async () => {
     await delay(500);
-    return { data: mockProducts };
+    const data = await fetchProducts();
+    return { data };
   },
 
-  // Get product by ID
+  /**
+   * Lấy chi tiết một sản phẩm theo ID
+   */
   getProductById: async (id) => {
     await delay(300);
-    const product = mockProducts.find(p => p.id === parseInt(id));
-    if (!product) throw new Error('Product not found');
-    return { data: product };
+    const products = await fetchProducts();
+    const found = products.find(p => p.id === Number(id));
+    if (!found) {
+      throw new Error('Không tìm thấy khóa học');
+    }
+    return { data: found };
   },
 
-  // Search products
+  /**
+   * Tìm kiếm sản phẩm theo tên hoặc mô tả ngắn
+   */
   searchProducts: async (query) => {
     await delay(400);
-    const filtered = mockProducts.filter(p => 
+    const products = await fetchProducts();
+    const filtered = products.filter(p =>
       p.name.toLowerCase().includes(query.toLowerCase()) ||
       p.shortDescription.toLowerCase().includes(query.toLowerCase())
     );
-    
-    // Track search behavior
-    storage.trackUserAction('search', null, { 
-      query, 
-      resultsCount: filtered.length 
+    storage.trackUserAction('search', null, {
+      query,
+      resultsCount: filtered.length
     });
-    
     return { data: filtered };
   },
 
-  // Filter products by price
+  /**
+   * Lọc sản phẩm theo khoảng giá
+   */
   filterByPrice: async (minPrice, maxPrice) => {
     await delay(400);
-    const filtered = mockProducts.filter(p => 
+    const products = await fetchProducts();
+    const filtered = products.filter(p =>
       p.price >= minPrice && p.price <= maxPrice
     );
     return { data: filtered };
   },
 
-  // Enhanced AI Suggestions với multiple algorithms
+  /**
+   * Gợi ý AI nâng cao (dùng chung products.json, không cần file riêng)
+   */
   getSuggestions: async (userId) => {
     await delay(800);
-    
-    // Simulate API failure cho error handling testing
+
     if (shouldFail()) {
-      throw new Error('AI Service temporarily unavailable');
+      throw new Error('AI Service tạm thời không khả dụng');
     }
-    
-    console.log(`🤖 AI Engine: Processing suggestions for user ${userId}`);
-    
-    // Get user preferences và behavior
-    const preferences = storage.getUserPreferences();
-    const history = storage.getHistory();
-    const favorites = storage.getFavorites();
-    
-    console.log('📊 User Profile:', preferences);
-    
-    // Nếu user mới (chưa có behavior data)
-    if (!preferences.isActiveUser) {
-      console.log('👤 New user detected - showing popular items');
-      return {
-        data: api.getPopularProducts(),
-        reason: 'popular',
-        confidence: 0.6,
-        message: 'Khóa học phổ biến dành cho bạn'
-      };
+
+    // 1) Load tất cả khóa học
+    const products   = await fetchProducts();
+
+    // 2) Lấy hành vi người dùng
+    const history       = storage.getHistory()       || [];  // đã xem
+    const favoriteIds   = storage.getFavorites()     || [];  // đã thích
+    const cartEntries   = storage.getCartItems?.()   || [];  // đã bỏ giỏ
+    const behavior      = storage.getUserBehavior() || {};
+    const searchHistory = behavior.searchHistory      || [];  // đã tìm kiếm
+
+    // 3) Đếm tần suất category trong 4 hành vi
+    const freq = {};
+    const recordCategory = (cat) => {
+      if (!cat) return;
+      freq[cat] = (freq[cat] || 0) + 1;
+    };
+
+    // lịch sử xem
+    history.forEach(p => recordCategory(p.category));
+    // đã thích
+    favoriteIds.forEach(id => {
+      const p = products.find(x => x.id === id);
+      if (p) recordCategory(p.category);
+    });
+    // đã bỏ giỏ
+    cartEntries.forEach(p => recordCategory(p.category));
+    // tìm kiếm
+    searchHistory.forEach(s => {
+      const p = products.find(x =>
+        x.name.toLowerCase().includes(s.query.toLowerCase())
+      );
+      if (p) recordCategory(p.category);
+    });
+
+    // 4) Xác định category ưu tiên
+    const catsSorted = Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .map(([cat]) => cat);
+    const topCat = catsSorted[0] || null;
+
+    // 5) Loại trừ khóa đã tương tác (xem, thích, giỏ)
+    const exclude = new Set([
+      ...history.map(p => p.id),
+      ...favoriteIds,
+      ...cartEntries.map(p => p.id)
+    ]);
+
+    // 6) Lấy tối đa 5 khóa cùng category ưu tiên
+    let suggestions = [];
+    if (topCat) {
+      suggestions = products
+        .filter(p => p.category === topCat && !exclude.has(p.id))
+        .slice(0, 5);
     }
-    
-    // Algorithm 1: Content-based filtering
-    const contentBasedSuggestions = api.getContentBasedSuggestions(preferences, history);
-    
-    // Algorithm 2: Collaborative filtering (mock)
-    const collaborativeSuggestions = api.getCollaborativeFilteringSuggestions(userId);
-    
-    // Algorithm 3: Trending in user's preferred categories
-    const trendingSuggestions = api.getTrendingSuggestions(preferences);
-    
-    // Merge và rank suggestions
-    const allSuggestions = [
-      ...contentBasedSuggestions.map(s => ({ ...s, score: s.score * 1.2 })), // Boost content-based
-      ...collaborativeSuggestions.map(s => ({ ...s, score: s.score * 1.0 })),
-      ...trendingSuggestions.map(s => ({ ...s, score: s.score * 0.8 }))
-    ];
-    
-    // Remove duplicates và already viewed/favorited
-    const viewedIds = history.map(h => h.product.id);
-    const uniqueSuggestions = allSuggestions
-      .filter((s, index, self) => 
-        self.findIndex(item => item.product.id === s.product.id) === index &&
-        !viewedIds.includes(s.product.id) &&
-        !favorites.includes(s.product.id)
-      )
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3);
-    
-    // Determine primary reason for suggestions
-    let reason = 'mixed';
-    let message = 'Gợi ý dành riêng cho bạn';
-    
-    if (preferences.recentCategories.length > 0) {
-      reason = 'recent_interest';
-      message = `Vì bạn quan tâm đến ${preferences.recentCategories[0]}`;
-    } else if (preferences.preferredCategories.length > 0) {
-      reason = 'category_preference';
-      message = `Dựa trên sở thích ${preferences.preferredCategories[0]} của bạn`;
+
+    // 7) Nếu chưa đủ 5, bổ sung thêm theo review cao
+    if (suggestions.length < 5) {
+      const need = 5 - suggestions.length;
+      const extra = products
+        .filter(p => !exclude.has(p.id) && (!topCat || p.category !== topCat))
+        .sort((a, b) => b.reviews - a.reviews)
+        .slice(0, need);
+      suggestions = suggestions.concat(extra);
     }
-    
+
+    // 8) Xây dựng message và confidence
+    const message = topCat
+      ? `Gợi ý theo danh mục "${topCat}"`
+      : 'Gợi ý khóa học phổ biến';
+    const confidence = topCat
+      ? Math.min(freq[topCat] / (Object.values(freq).reduce((a,b)=>a+b,0) || 1), 1)
+      : 0.6;
+
     return {
-      data: uniqueSuggestions.map(s => s.product),
-      reason,
-      confidence: Math.min(...uniqueSuggestions.map(s => s.score)) || 0.7,
+      data: suggestions,
       message,
-      debug: {
-        totalProducts: mockProducts.length,
-        algorithmsUsed: ['content-based', 'collaborative', 'trending'],
-        userProfile: preferences
-      }
+      confidence
     };
   },
 
-  // Content-based filtering algorithm
+  /**
+   * Content-based filtering suggestions
+   */
   getContentBasedSuggestions: (preferences, history) => {
-    const suggestions = [];
-    
-    // Find products similar to recently viewed
+    const suggestions    = [];
     const recentlyViewed = history.slice(0, 5).map(h => h.product);
-    
-    mockProducts.forEach(product => {
+    const products       = _productsCache || [];
+
+    products.forEach(product => {
       let score = 0;
-      
-      // Category matching
-      if (preferences.preferredCategories.includes(product.category)) {
-        score += 0.4;
-      }
-      if (preferences.recentCategories.includes(product.category)) {
-        score += 0.3;
-      }
-      
-      // Price range matching
-      const productPriceRange = storage.getPriceRange(product.price);
-      if (productPriceRange === preferences.preferredPriceRange) {
-        score += 0.2;
-      }
-      
-      // Rating matching
-      if (product.rating >= preferences.minPreferredRating) {
-        score += 0.1;
-      }
-      
-      // Similarity to recently viewed (mock similarity)
-      recentlyViewed.forEach(viewed => {
-        if (viewed.category === product.category && viewed.id !== product.id) {
-          score += 0.15;
-        }
+      if (preferences.preferredCategories.includes(product.category)) score += 0.4;
+      if (preferences.recentCategories.includes(product.category))    score += 0.3;
+      const pr = storage.getPriceRange(product.price);
+      if (pr === preferences.preferredPriceRange)                     score += 0.2;
+      if (product.rating >= preferences.minPreferredRating)          score += 0.1;
+      recentlyViewed.forEach(rv => {
+        if (rv.category === product.category && rv.id !== product.id) score += 0.15;
       });
-      
-      if (score > 0) {
-        suggestions.push({ product, score, algorithm: 'content-based' });
-      }
+      if (score > 0) suggestions.push({ product, score, algorithm: 'content-based' });
     });
-    
-    return suggestions.sort((a, b) => b.score - a.score).slice(0, 5);
+
+    return suggestions
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
   },
 
-  // Mock collaborative filtering
+  /**
+   * Mock collaborative filtering suggestions
+   */
   getCollaborativeFilteringSuggestions: (userId) => {
-    // Simulate: "Users who viewed similar products also viewed..."
-    const userGroup = parseInt(userId.slice(-1)) % 3; // Mock user grouping
-    
-    const groupPreferences = {
+    const products = _productsCache || [];
+    const group = parseInt(userId.slice(-1), 10) % 3;
+    const prefs = {
       0: ['programming', 'english'],
       1: ['english', 'design'],
       2: ['marketing', 'design']
     };
-    
-    const preferredCategories = groupPreferences[userGroup] || ['programming'];
-    
-    return mockProducts
-      .filter(p => preferredCategories.includes(p.category))
+    const categories = prefs[group] || ['programming'];
+    return products
+      .filter(p => categories.includes(p.category))
       .map(product => ({
         product,
-        score: Math.random() * 0.5 + 0.5, // Random score 0.5-1.0
+        score: Math.random() * 0.5 + 0.5,
         algorithm: 'collaborative'
       }))
       .slice(0, 3);
   },
 
-  // Get trending products in categories
+  /**
+   * Trending suggestions (high review count)
+   */
   getTrendingSuggestions: (preferences) => {
-    // Mock trending products
-    return mockProducts
-      .filter(p => 
+    const products = _productsCache || [];
+    return products
+      .filter(p =>
         preferences.preferredCategories.includes(p.category) ||
-        p.reviews > 300 // High engagement
+        p.reviews > 300
       )
       .map(product => ({
         product,
-        score: (product.reviews / 500) * 0.8, // Score based on popularity
+        score: (product.reviews / 500) * 0.8,
         algorithm: 'trending'
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 3);
   },
 
-  // Get popular products for new users
+  /**
+   * Popular products for new users
+   */
   getPopularProducts: () => {
-    return mockProducts
+    const products = _productsCache || [];
+    return products
       .sort((a, b) => (b.rating * b.reviews) - (a.rating * a.reviews))
       .slice(0, 3);
   },
 
-  // Get products by category
+  /**
+   * Lấy sản phẩm theo category
+   */
   getProductsByCategory: async (category) => {
     await delay(400);
-    const filtered = mockProducts.filter(p => p.category === category);
+    const products = await fetchProducts();
+    const filtered = products.filter(p => p.category === category);
     return { data: filtered };
   }
 };
