@@ -1,23 +1,19 @@
-// src/pages/AuthPage.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '../utils/storage';
 
 export default function AuthPage({ onAuthSuccess }) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState('login'); // 'login' or 'register'
+  const [mode, setMode] = useState('login'); 
 
-  // common
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
 
-  // register only
   const [username, setUsername]         = useState('');
   const [confirmPassword, setConfirm]   = useState('');
   const [passwordStrength, setStrength] = useState(0);
   const [errors, setErrors]             = useState({});
 
-  // đánh giá độ mạnh mật khẩu
   const evaluateStrength = pwd => {
     let score = 0;
     if (pwd.length >= 8)      score += 1;
@@ -30,7 +26,6 @@ export default function AuthPage({ onAuthSuccess }) {
   const handleRegister = () => {
     const existing = storage.findUserByEmail(email);
     if (existing) {
-      // email đã có, tự động đăng nhập nếu mật khẩu khớp
       if (existing.password === password) {
         storage.setUser({ username: existing.username, email });
         onAuthSuccess({ username: existing.username, email });
@@ -42,7 +37,6 @@ export default function AuthPage({ onAuthSuccess }) {
       return;
     }
 
-    // nếu chưa có, validate
     const errs = {};
     if (!username.trim()) errs.username = 'Vui lòng nhập tên đăng nhập';
     if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Email không hợp lệ';
@@ -54,7 +48,6 @@ export default function AuthPage({ onAuthSuccess }) {
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
-    // thêm user mới
     storage.addUser({ username, email, password });
     storage.setUser({ username, email });
     onAuthSuccess({ username, email });

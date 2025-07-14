@@ -14,14 +14,14 @@ const ratingOptions = [
 ];
 
 export default function FilterPanel({
-  categories = [],               // mảng các category có trong sản phẩm
-  selectedCategory = 'all',      // giá trị category đang chọn
-  onCategoryChange,              // fn(newCategory)
+  categories = [],               
+  selectedCategory = 'all',      
+  onCategoryChange,             
   selectedPriceRange = { min: 0, max: Infinity },
-  onPriceChange,                 // fn({ min, max })
+  onPriceChange,                 
   selectedRating = 'all',
-  onRatingChange,                // fn(newRating)
-  onClearAll                     // fn() để reset tất cả bộ lọc
+  onRatingChange,                
+  onClearAll                    
 }) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md space-y-6 sticky top-24">

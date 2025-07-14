@@ -18,18 +18,15 @@ export default function HomePage() {
   const [cartItemsCount, setCartItemsCount] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
 
-  // Filter + sort states
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(0);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [ratingFilter, setRatingFilter] = useState('all');
   const [sortOption, setSortOption] = useState('default');
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Compute max price & unique categories
   const productMaxPrice = useMemo(
     () => (products.length ? Math.max(...products.map(p => p.price)) : 0),
     [products]
@@ -45,7 +42,6 @@ export default function HomePage() {
     setCartItemsCount(storage.getCartItemsCount());
   }, []);
 
-  // init slider khi có products
   useEffect(() => {
     if (products.length) {
       setPriceMin(0);
@@ -53,7 +49,6 @@ export default function HomePage() {
     }
   }, [products, productMaxPrice]);
 
-  // load từ api
   const loadProducts = async () => {
     try {
       const response = await api.getProducts();
@@ -66,11 +61,9 @@ export default function HomePage() {
     }
   };
 
-  // áp dụng search + lọc + sort
   useEffect(() => {
     let filtered = [...products];
 
-    // search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(p =>
@@ -79,22 +72,18 @@ export default function HomePage() {
       );
     }
 
-    // price slider
     filtered = filtered.filter(p => p.price >= priceMin && p.price <= priceMax);
 
-    // category
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(p => p.category === categoryFilter);
     }
 
-    // rating
     if (ratingFilter === '4up') {
       filtered = filtered.filter(p => p.rating >= 4);
     } else if (ratingFilter === '3up') {
       filtered = filtered.filter(p => p.rating >= 3);
     }
 
-    // sort
     switch (sortOption) {
       case 'priceAsc':
         filtered.sort((a, b) => a.price - b.price);
@@ -186,7 +175,6 @@ export default function HomePage() {
     );
   }
 
-  // pagination
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
@@ -268,7 +256,6 @@ export default function HomePage() {
           <div className="lg:col-span-1">
             <div className="bg-white p-4 rounded-lg shadow sticky top-24 space-y-4">
               <h3 className="font-bold text-lg">Bộ lọc</h3>
-
               {/* Sắp xếp */}
               <div>
                 <h4 className="font-semibold text-gray-700 mb-2">Sắp xếp</h4>
@@ -550,7 +537,12 @@ export default function HomePage() {
             <div className="p-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full rounded-lg" />
+                  <img
+                    src={`/images/${selectedProduct.category.toLowerCase()}.jpg`}
+                    alt={selectedProduct.name}
+                    onError={e => { e.currentTarget.src = '/images/placeholder.jpg'; }}
+                    className="w-full rounded-lg"
+                  />
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold mb-3">{selectedProduct.name}</h3>

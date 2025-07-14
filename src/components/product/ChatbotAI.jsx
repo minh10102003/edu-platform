@@ -12,27 +12,21 @@ export default function ChatbotAI({ onClose }) {
   const [modalOpen, setModalOpen] = useState(false);
   const endRef = useRef(null);
 
-  // Scroll xuống cuối mỗi khi có tin nhắn mới
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Khi user gửi tin nhắn
   const handleSend = async () => {
     const text = input.trim();
     if (!text) return;
     setMessages(msgs => [...msgs, { type: 'user', text }]);
     setInput('');
 
-    // Lấy toàn bộ danh sách khóa học
     const all = (await api.getProducts()).data;
     const lower = text.toLowerCase();
 
-    // 1) Nếu là câu hỏi chung kiểu "khóa học nào", "có ... khóa học" thì chỉ liệt kê danh mục
     if (/khóa học.*nào/.test(lower) || /có.*khóa học/.test(lower) || /các khóa học .*đang có/.test(lower)) {
-      // Lấy danh sách category duy nhất
       const cats = [...new Set(all.map(p => p.category))];
-      // Viết hoa chữ cái đầu mỗi danh mục
       const pretty = cats.map(cat => cat.charAt(0).toUpperCase() + cat.slice(1));
       setMessages(msgs => [
         ...msgs,
@@ -41,7 +35,6 @@ export default function ChatbotAI({ onClose }) {
       return;
     }
 
-    // 2) Ngược lại, kiểm tra xem user có nhắc đến 1 danh mục cụ thể không
     const cats = [...new Set(all.map(p => p.category))];
     const matched = cats.find(cat => lower.includes(cat.toLowerCase()));
 
@@ -52,7 +45,6 @@ export default function ChatbotAI({ onClose }) {
         { type: 'cards', products: all.filter(p => p.category === matched) },
       ]);
     } else {
-      // 3) Không hiểu, trả lời chung
       setMessages(msgs => [
         ...msgs,
         { type: 'bot', text: 'Xin lỗi, mình không tìm thấy khóa học phù hợp.' }
@@ -60,7 +52,6 @@ export default function ChatbotAI({ onClose }) {
     }
   };
 
-  // Khi bấm xem chi tiết trong Chatbot
   const handleViewDetail = product => {
     storage.addToHistory(product);
     setSelectedProduct(product);

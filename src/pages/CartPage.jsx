@@ -1,5 +1,3 @@
-// src/pages/CartPage.jsx
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { storage } from '../utils/storage';

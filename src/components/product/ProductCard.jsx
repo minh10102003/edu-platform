@@ -15,13 +15,10 @@ export default function ProductCard({
   const toggleFavorite = (e) => {
     e.stopPropagation();
     const newFav = !isFavorite;
-
     if (newFav) storage.addFavorite(product.id);
     else storage.removeFavorite(product.id);
-
     setIsFavorite(newFav);
     onToggleFavorite(product.id, newFav);
-
     showToast(newFav ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích');
   };
 
@@ -36,16 +33,19 @@ export default function ProductCard({
   const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
-  // Chuyển chữ hoa chữ cái đầu
   const capitalize = (str) =>
     str.charAt(0).toUpperCase() + str.slice(1);
+
+  const category = product.category.toLowerCase();
+  const imageUrl = `/images/${category}.jpg`;
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="relative">
-        <img 
-          src={product.image} 
+        <img
+          src={imageUrl}
           alt={product.name}
+          onError={e => { e.currentTarget.src = '/images/placeholder.jpg'; }}
           className="w-full h-48 object-cover"
         />
         <button
@@ -60,21 +60,20 @@ export default function ProductCard({
           </svg>
         </button>
       </div>
-      
+
       <div className="p-4">
         <h3 className="font-semibold text-lg mb-2 line-clamp-2">{product.name}</h3>
         <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.shortDescription}</p>
-        
+
         <div className="flex items-center mb-3">
           <span className="text-yellow-500">★</span>
           <span className="ml-1 text-sm">{product.rating}</span>
           <span className="text-gray-400 text-sm ml-1">({product.reviews} đánh giá)</span>
-          {/* Tag nhỏ nằm ngang với rating */}
           <span className="ml-auto text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
             {capitalize(product.category)}
           </span>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold text-blue-600">{formatPrice(product.price)}</span>
           <button

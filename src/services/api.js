@@ -1,14 +1,9 @@
-// src/services/api.js
-
 import { storage } from '../utils/storage';
 
-// Simulate API delay (in ms)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Simulate API failure rate (e.g. for AI suggestions)
-const shouldFail = () => Math.random() < 0.1; // 10% chance to fail
+const shouldFail = () => Math.random() < 0.1; 
 
-// In-memory cache of products to avoid refetching
 let _productsCache = null;
 
 /**
@@ -87,33 +82,26 @@ export const api = {
       throw new Error('AI Service tạm thời không khả dụng');
     }
 
-    // 1) Load tất cả khóa học
     const products   = await fetchProducts();
 
-    // 2) Lấy hành vi người dùng
-    const history       = storage.getHistory()       || [];  // đã xem
-    const favoriteIds   = storage.getFavorites()     || [];  // đã thích
-    const cartEntries   = storage.getCartItems?.()   || [];  // đã bỏ giỏ
+    const history       = storage.getHistory()       || [];  
+    const favoriteIds   = storage.getFavorites()     || [];  
+    const cartEntries   = storage.getCartItems?.()   || [];  
     const behavior      = storage.getUserBehavior() || {};
-    const searchHistory = behavior.searchHistory      || [];  // đã tìm kiếm
+    const searchHistory = behavior.searchHistory      || [];  
 
-    // 3) Đếm tần suất category trong 4 hành vi
     const freq = {};
     const recordCategory = (cat) => {
       if (!cat) return;
       freq[cat] = (freq[cat] || 0) + 1;
     };
 
-    // lịch sử xem
     history.forEach(p => recordCategory(p.category));
-    // đã thích
     favoriteIds.forEach(id => {
       const p = products.find(x => x.id === id);
       if (p) recordCategory(p.category);
     });
-    // đã bỏ giỏ
     cartEntries.forEach(p => recordCategory(p.category));
-    // tìm kiếm
     searchHistory.forEach(s => {
       const p = products.find(x =>
         x.name.toLowerCase().includes(s.query.toLowerCase())
@@ -121,20 +109,17 @@ export const api = {
       if (p) recordCategory(p.category);
     });
 
-    // 4) Xác định category ưu tiên
     const catsSorted = Object.entries(freq)
       .sort((a, b) => b[1] - a[1])
       .map(([cat]) => cat);
     const topCat = catsSorted[0] || null;
 
-    // 5) Loại trừ khóa đã tương tác (xem, thích, giỏ)
     const exclude = new Set([
       ...history.map(p => p.id),
       ...favoriteIds,
       ...cartEntries.map(p => p.id)
     ]);
 
-    // 6) Lấy tối đa 5 khóa cùng category ưu tiên
     let suggestions = [];
     if (topCat) {
       suggestions = products
@@ -142,7 +127,6 @@ export const api = {
         .slice(0, 5);
     }
 
-    // 7) Nếu chưa đủ 5, bổ sung thêm theo review cao
     if (suggestions.length < 5) {
       const need = 5 - suggestions.length;
       const extra = products
@@ -152,7 +136,6 @@ export const api = {
       suggestions = suggestions.concat(extra);
     }
 
-    // 8) Xây dựng message và confidence
     const message = topCat
       ? `Gợi ý theo danh mục "${topCat}"`
       : 'Gợi ý khóa học phổ biến';

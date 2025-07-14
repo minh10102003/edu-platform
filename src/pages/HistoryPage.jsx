@@ -1,5 +1,3 @@
-// src/pages/HistoryPage.jsx
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { storage } from '../utils/storage';
@@ -8,28 +6,24 @@ export default function HistoryPage() {
   const [historyProducts, setHistoryProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // grid or list
-  const [sortBy, setSortBy] = useState('recent');   // recent, name, price
+  const [viewMode, setViewMode] = useState('grid'); 
+  const [sortBy, setSortBy] = useState('recent');   
   const [filterCategory, setFilterCategory] = useState('all');
-  const [showConfirmClear, setShowConfirmClear] = useState(false); // popup xác nhận
+  const [showConfirmClear, setShowConfirmClear] = useState(false); 
 
   useEffect(() => {
     loadHistory();
   }, [sortBy, filterCategory]);
 
   const loadHistory = () => {
-    // 1) Lấy các entry { product, … }
     const entries = storage.getHistory() || [];
 
-    // 2) Trích ra mảng product
     let history = entries.map(entry => entry.product);
 
-    // 3) Filter by category
     if (filterCategory !== 'all') {
       history = history.filter(p => p.category === filterCategory);
     }
 
-    // 4) Sort
     switch (sortBy) {
       case 'name':
         history.sort((a, b) => a.name.localeCompare(b.name));
@@ -39,11 +33,9 @@ export default function HistoryPage() {
         break;
       case 'recent':
       default:
-        // đã sắp xếp theo recent khi lưu vào storage
         break;
     }
 
-    // 5) Cập nhật state
     setHistoryProducts(history);
   };
 
@@ -57,7 +49,6 @@ export default function HistoryPage() {
     setSelectedProduct(null);
   };
 
-  // Hàm thực sự xóa toàn bộ lịch sử (gọi khi user xác nhận)
   const clearAllHistory = () => {
     localStorage.removeItem('viewHistory');
     setHistoryProducts([]);

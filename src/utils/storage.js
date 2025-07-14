@@ -1,7 +1,4 @@
-// src/utils/storage.js
-
 export const storage = {
-  // Favorites
   getFavorites: () => {
     const saved = localStorage.getItem('favorites');
     return saved ? JSON.parse(saved) : [];
@@ -28,7 +25,6 @@ export const storage = {
     return storage.getFavorites().includes(productId);
   },
 
-  // Cart Management
   getCart: () => {
     const saved = localStorage.getItem('cart');
     return saved ? JSON.parse(saved) : [];
@@ -82,7 +78,6 @@ export const storage = {
     return storage.getCart().some(i => i.product.id === productId);
   },
 
-  // History
   getHistory: () => {
     const saved = localStorage.getItem('viewHistory');
     return saved ? JSON.parse(saved) : [];
@@ -105,7 +100,6 @@ export const storage = {
     return updated;
   },
 
-  // User Behavior
   getUserBehavior: () => {
     const saved = localStorage.getItem('userBehavior');
     return saved
@@ -190,7 +184,6 @@ export const storage = {
     localStorage.removeItem('cart');
   },
 
-  // Authentication & multi-user support
   getAllUsers: () => {
     const saved = localStorage.getItem('users');
     return saved ? JSON.parse(saved) : [];

@@ -11,7 +11,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
   const formatPrice = price =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
-  // split theo 2 newline => từng block paragraph
   const blocks = product.fullDescription.split('\n\n');
 
   return (
