@@ -1,166 +1,189 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { storage } from '../utils/storage';
+"use client"
 
-export default function AuthPage({ onAuthSuccess }) {
-  const navigate = useNavigate();
-  const [mode, setMode] = useState('login'); 
+import { useState } from "react"
+import { Link } from "react-router-dom"
 
-  const [email, setEmail]       = useState('');
-  const [password, setPassword] = useState('');
+export default function AuthPage() {
+  const [isLogin, setIsLogin] = useState(true)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [passwordStrength, setPasswordStrength] = useState(0) // 0-4 for strength indicator
+  const [error, setError] = useState("")
 
-  const [username, setUsername]         = useState('');
-  const [confirmPassword, setConfirm]   = useState('');
-  const [passwordStrength, setStrength] = useState(0);
-  const [errors, setErrors]             = useState({});
+  const checkPasswordStrength = (pw) => {
+    let strength = 0
+    if (pw.length > 7) strength++
+    if (pw.match(/[a-z]/) && pw.match(/[A-Z]/)) strength++
+    if (pw.match(/\d/)) strength++
+    if (pw.match(/[^a-zA-Z0-9]/)) strength++
+    setPasswordStrength(strength)
+  }
 
-  const evaluateStrength = pwd => {
-    let score = 0;
-    if (pwd.length >= 8)      score += 1;
-    if (/[A-Z]/.test(pwd))    score += 1;
-    if (/[0-9]/.test(pwd))    score += 1;
-    if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
-    setStrength(score);
-  };
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value)
+    checkPasswordStrength(e.target.value)
+  }
 
-  const handleRegister = () => {
-    const existing = storage.findUserByEmail(email);
-    if (existing) {
-      if (existing.password === password) {
-        storage.setUser({ username: existing.username, email });
-        onAuthSuccess({ username: existing.username, email });
-        navigate('/');
-      } else {
-        alert('Email này đã được đăng ký. Vui lòng nhập đúng mật khẩu để đăng nhập.');
-        setMode('login');
-      }
-      return;
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setError("")
+
+    if (!email || !password) {
+      setError("Vui lòng điền đầy đủ email và mật khẩu.")
+      return
     }
 
-    const errs = {};
-    if (!username.trim()) errs.username = 'Vui lòng nhập tên đăng nhập';
-    if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Email không hợp lệ';
-    if (password.length < 8) errs.password = 'Mật khẩu phải ≥ 8 ký tự';
-    if (!/[A-Z]/.test(password)) errs.password = 'Phải có ít nhất 1 chữ hoa';
-    if (!/[0-9]/.test(password)) errs.password = 'Phải có ít nhất 1 số';
-    if (!/[^A-Za-z0-9]/.test(password)) errs.password = 'Phải có ít nhất 1 ký tự đặc biệt';
-    if (confirmPassword !== password) errs.confirm = 'Không khớp mật khẩu';
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
+    if (!isLogin && password !== confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp.")
+      return
+    }
 
-    storage.addUser({ username, email, password });
-    storage.setUser({ username, email });
-    onAuthSuccess({ username, email });
-    navigate('/');
-  };
+    if (!isLogin && passwordStrength < 3) {
+      setError("Mật khẩu quá yếu. Vui lòng sử dụng mật khẩu mạnh hơn.")
+      return
+    }
 
-  const handleLogin = () => {
-    const u = storage.findUserByEmail(email);
-    const errs = {};
-    if (!u)                errs.email = 'Email không tồn tại';
-    else if (u.password !== password) errs.password = 'Sai mật khẩu';
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-
-    storage.setUser({ username: u.username, email });
-    onAuthSuccess({ username: u.username, email });
-    navigate('/');
-  };
+    if (isLogin) {
+      // Simulate login
+      console.log("Đăng nhập với:", { email, password })
+      alert("Đăng nhập thành công! (Chức năng giả lập)")
+      // Redirect or update auth state
+    } else {
+      // Simulate registration
+      console.log("Đăng ký với:", { email, password })
+      alert("Đăng ký thành công! (Chức năng giả lập)")
+      setIsLogin(true) // Switch to login after successful registration
+    }
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <div className="flex justify-around mb-6">
-          <button
-            className={`py-2 px-4 ${mode==='login'? 'border-b-2 border-blue-600 font-semibold': 'text-gray-500'}`}
-            onClick={() => { setMode('login'); setErrors({}); }}
-          >
-            Đăng nhập
-          </button>
-          <button
-            className={`py-2 px-4 ${mode==='register'? 'border-b-2 border-blue-600 font-semibold': 'text-gray-500'}`}
-            onClick={() => { setMode('register'); setErrors({}); }}
-          >
-            Đăng ký
-          </button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10 w-full max-w-md transform transition-all duration-500 ease-in-out scale-95 hover:scale-100">
+        <h2 className="text-4xl font-extrabold text-center text-gray-900 mb-8 animate-fade-in-up">
+          {isLogin ? "Đăng nhập" : "Đăng ký"}
+        </h2>
 
-        {mode === 'register' && (
-          <label className="block mb-2">
-            Tên đăng nhập
-            <input
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              className="w-full mt-1 p-2 border rounded"
-            />
-            {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
-          </label>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6 animate-fade-in">
+            <strong className="font-bold">Lỗi!</strong>
+            <span className="block sm:inline"> {error}</span>
+          </div>
         )}
 
-        <label className="block mb-2">
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="w-full mt-1 p-2 border rounded"
-          />
-          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-        </label>
-
-        <label className="block mb-2">
-          Mật khẩu
-          <input
-            type="password"
-            value={password}
-            onChange={e => { setPassword(e.target.value); evaluateStrength(e.target.value); }}
-            className="w-full mt-1 p-2 border rounded"
-          />
-          {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-        </label>
-
-        {mode === 'register' && (
-          <>
-            <label className="block mb-2">
-              Nhập lại mật khẩu
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Địa chỉ Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              placeholder="your@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              Mật khẩu
+            </label>
+            <input
+              type="password"
+              id="password"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              placeholder="••••••••"
+              value={password}
+              onChange={handlePasswordChange}
+              required
+            />
+            {!isLogin && (
+              <div className="mt-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      passwordStrength === 0
+                        ? "w-0"
+                        : passwordStrength === 1
+                          ? "w-1/4 bg-red-500"
+                          : passwordStrength === 2
+                            ? "w-1/2 bg-orange-500"
+                            : passwordStrength === 3
+                              ? "w-3/4 bg-yellow-500"
+                              : "w-full bg-green-500"
+                    }`}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {passwordStrength === 0
+                    ? "Rất yếu"
+                    : passwordStrength === 1
+                      ? "Yếu"
+                      : passwordStrength === 2
+                        ? "Trung bình"
+                        : passwordStrength === 3
+                          ? "Mạnh"
+                          : "Rất mạnh"}
+                </p>
+              </div>
+            )}
+          </div>
+          {!isLogin && (
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                Xác nhận Mật khẩu
+              </label>
               <input
                 type="password"
+                id="confirmPassword"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                placeholder="••••••••"
                 value={confirmPassword}
-                onChange={e => setConfirm(e.target.value)}
-                className="w-full mt-1 p-2 border rounded"
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
               />
-              {errors.confirm && <p className="text-red-500 text-sm">{errors.confirm}</p>}
-            </label>
-
-            <div className="mb-4">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Độ mạnh mật khẩu:</span>
-                <span>
-                  {['Rất yếu','Yếu','Trung bình','Mạnh'][Math.max(0, passwordStrength-1)] || 'Rất yếu'}
-                </span>
-              </div>
-              <div className="w-full h-2 bg-gray-200 rounded">
-                <div
-                  className={`h-2 rounded ${
-                    passwordStrength <= 1 ? 'bg-red-500' :
-                    passwordStrength === 2 ? 'bg-yellow-500' :
-                    passwordStrength === 3 ? 'bg-blue-500' :
-                                             'bg-green-500'
-                  }`}
-                  style={{ width: `${(passwordStrength/4)*100}%` }}
-                />
-              </div>
             </div>
-          </>
-        )}
+          )}
+          <button
+            type="submit"
+            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg animate-fade-in-up animation-delay-200 whitespace-nowrap"
+          >
+            {isLogin ? "Đăng nhập" : "Đăng ký"}
+          </button>
+        </form>
 
-        <button
-          onClick={mode==='login' ? handleLogin : handleRegister}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
-        >
-          {mode==='login' ? 'Đăng nhập' : 'Đăng ký'}
-        </button>
+        <div className="mt-8 text-center text-gray-600 animate-fade-in-up animation-delay-400">
+          {isLogin ? (
+            <p>
+              Chưa có tài khoản?{" "}
+              <button
+                onClick={() => setIsLogin(false)}
+                className="text-blue-600 hover:underline font-medium whitespace-nowrap"
+              >
+                Đăng ký ngay
+              </button>
+            </p>
+          ) : (
+            <p>
+              Đã có tài khoản?{" "}
+              <button
+                onClick={() => setIsLogin(true)}
+                className="text-blue-600 hover:underline font-medium whitespace-nowrap"
+              >
+                Đăng nhập
+              </button>
+            </p>
+          )}
+          <Link
+            to="/"
+            className="block mt-4 text-sm text-gray-500 hover:text-blue-600 hover:underline whitespace-nowrap"
+          >
+            Quay lại trang chủ
+          </Link>
+        </div>
       </div>
     </div>
-  );
+  )
 }
