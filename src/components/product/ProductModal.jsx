@@ -65,7 +65,7 @@ export default function ProductModal({ product, onClose, onAddToCart, onRefreshC
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 animate-fade-in">
       {/* Increased max-w to make the modal wider */}
-      <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full flex flex-col lg:flex-row overflow-hidden transform scale-95 animate-scale-in">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full flex flex-col lg:flex-row overflow-hidden transform scale-95 animate-scale-in max-h-[90vh]">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -96,7 +96,7 @@ export default function ProductModal({ product, onClose, onAddToCart, onRefreshC
 
         {/* Product Details */}
         <div className="lg:w-1/2 p-8 flex flex-col justify-between">
-          <div>
+          <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar">
             <h2 className="text-3xl font-bold text-gray-900 mb-3">{product.name}</h2>
             <div className="flex items-center mb-4">
               <div className="flex items-center text-yellow-400 mr-2">
@@ -115,8 +115,8 @@ export default function ProductModal({ product, onClose, onAddToCart, onRefreshC
                 {product.rating} ({product.reviews} đánh giá)
               </span>
             </div>
-            {/* Using full description */}
-            <p className="text-gray-700 leading-relaxed mb-6">{product.description}</p>
+            {/* Using fullDescription */}
+            <p className="text-gray-700 leading-relaxed mb-6">{product.fullDescription}</p>
 
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-6">
               <div className="flex items-center">

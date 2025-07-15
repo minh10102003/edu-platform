@@ -5,7 +5,8 @@ import { api } from "../../services/api.js" // Assuming api is in src/services/a
 import { storage } from "../../utils/storage.js" // Assuming storage is in src/utils/storage.js or .ts
 // Removed: import { allProducts } from "../../data/products.js"; or "../public/api/products.json";
 
-export default function ChatbotAI({ onClose, onProductClick }) {
+export default function ChatbotAI({ onClose, onProductClick, className }) {
+  // Thêm className prop
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
@@ -120,7 +121,9 @@ export default function ChatbotAI({ onClose, onProductClick }) {
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg h-[80vh] flex flex-col relative animate-scale-in">
+    <div
+      className={`bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[70vh] flex flex-col relative mb-20 mr-6 ${className}`}
+    >
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 rounded-t-3xl flex items-center justify-between shadow-md">
         <h3 className="text-xl font-bold flex items-center gap-2">

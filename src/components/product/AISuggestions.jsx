@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { api } from "../../services/api.js" // Added .js
 import { storage } from "../../utils/storage.js" // Added .js
 
-export default function AISuggestions({ onProductClick, onClose }) {
+export default function AISuggestions({ onProductClick, onClose, className }) {
+  // Thêm className prop
   const [suggestions, setSuggestions] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -57,7 +58,9 @@ export default function AISuggestions({ onProductClick, onClose }) {
 
   if (error && !loading) {
     return (
-      <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-lg">
+      <div
+        className={`bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-lg max-w-md max-h-[70vh] mb-20 ml-6 ${className}`}
+      >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-red-600 font-bold">⚠️ Không thể lấy gợi ý lúc này</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
@@ -84,7 +87,9 @@ export default function AISuggestions({ onProductClick, onClose }) {
   }
 
   return (
-    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg relative overflow-hidden">
+    <div
+      className={`bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg relative overflow-hidden max-w-md max-h-[70vh] mb-20 ml-6 ${className}`}
+    >
       <div className="absolute top-0 right-0 w-32 h-32 bg-purple-200 rounded-full -mr-16 -mt-16 opacity-50" />
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-pink-200 rounded-full -ml-12 -mb-12 opacity-50" />
       <div className="relative">
@@ -127,7 +132,7 @@ export default function AISuggestions({ onProductClick, onClose }) {
               <div
                 key={p.id}
                 data-product-id={p.id}
-                className="relative bg-white rounded-lg shadow-md hover:shadow-xl transition-transform transform hover:-translate-y-1 animate-fade-in"
+                className="relative bg-white rounded-lg shadow-md hover:shadow-xl transition-transform transform hover:-translate-y-1"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
                 {/* Badges */}
