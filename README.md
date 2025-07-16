@@ -35,7 +35,7 @@ npm -v
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your‑username/educommerce.git
+   git clone https://github.com/minh10102003/edu-platform
    cd educommerce
    ```
 
