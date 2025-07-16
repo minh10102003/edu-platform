@@ -67,13 +67,13 @@ export default function CartPage({ onRefreshCounts }) {
   const { t, currentLanguage: langFromCtx } = useTranslation()
   const currentLanguage = langFromCtx || i18n.getCurrentLanguage()
 
-  const [cartItems, setCartItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [cartItems, setCartItems]       = useState([])
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState(null)
   const [selectedProduct, setSelectedProduct] = useState(null)
-  const [promoCode, setPromoCode] = useState("")
+  const [promoCode, setPromoCode]       = useState("")
   const [appliedPromo, setAppliedPromo] = useState(null)
-  const [promoError, setPromoError] = useState("")
+  const [promoError, setPromoError]     = useState("")
   const [checkoutStep, setCheckoutStep] = useState(1)
   const [orderData, setOrderData] = useState({
     studentName: "",
@@ -84,9 +84,9 @@ export default function CartPage({ onRefreshCounts }) {
   })
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [confirmTitle, setConfirmTitle] = useState("")
-  const [confirmMessage, setConfirmMessage] = useState("")
-  const [confirmAction, setConfirmAction] = useState(() => () => {})
+  const [confirmTitle, setConfirmTitle]           = useState("")
+  const [confirmMessage, setConfirmMessage]       = useState("")
+  const [confirmAction, setConfirmAction]         = useState(() => () => {})
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -140,9 +140,9 @@ export default function CartPage({ onRefreshCounts }) {
   }
   const handleCloseModal = () => setSelectedProduct(null)
 
-  const subtotal = coursesInCart.reduce((sum, course) => sum + course.price, 0)
+  const subtotal       = coursesInCart.reduce((sum, course) => sum + course.price, 0)
   const discountAmount = appliedPromo ? subtotal * appliedPromo.discount : 0
-  const total = subtotal - discountAmount
+  const total          = subtotal - discountAmount
 
   const applyPromoCode = () => {
     setPromoError("")
@@ -252,16 +252,16 @@ export default function CartPage({ onRefreshCounts }) {
 
   const getCategoryColor = (category) => {
     const colors = {
-      art: "bg-pink-50 text-pink-700 border-pink-200",
-      business: "bg-blue-50 text-blue-700 border-blue-200",
-      design: "bg-purple-50 text-purple-700 border-purple-200",
-      music: "bg-green-50 text-green-700 border-green-200",
+      art:         "bg-pink-50 text-pink-700 border-pink-200",
+      business:    "bg-blue-50 text-blue-700 border-blue-200",
+      design:      "bg-purple-50 text-purple-700 border-purple-200",
+      music:       "bg-green-50 text-green-700 border-green-200",
       programming: "bg-orange-50 text-orange-700 border-orange-200",
       photography: "bg-indigo-50 text-indigo-700 border-indigo-200",
-      marketing: "bg-red-50 text-red-700 border-red-200",
-      english: "bg-yellow-50 text-yellow-700 border-yellow-200",
-      finance: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      health: "bg-teal-50 text-teal-700 border-teal-200"
+      marketing:   "bg-red-50 text-red-700 border-red-200",
+      english:     "bg-yellow-50 text-yellow-700 border-yellow-200",
+      finance:     "bg-emerald-50 text-emerald-700 border-emerald-200",
+      health:      "bg-teal-50 text-teal-700 border-teal-200"
     }
     return colors[category?.toLowerCase()] || "bg-gray-50 text-gray-700 border-gray-200"
   }
@@ -308,7 +308,7 @@ export default function CartPage({ onRefreshCounts }) {
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-6 overflow-x-hidden">
+    <div className="container mx-auto px-2 sm:px-4 py-6">
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-start space-x-6 mb-4 overflow-x-auto py-2">
@@ -332,19 +332,15 @@ export default function CartPage({ onRefreshCounts }) {
                   <span className="text-sm font-medium">{step}</span>
                 )}
               </div>
-              <span
-                className={`ml-2 text-sm font-medium ${
-                  step <= checkoutStep ? "text-blue-600" : "text-gray-400"
-                }`}
-              >
+              <span className={`ml-2 text-sm font-medium ${
+                step <= checkoutStep ? "text-blue-600" : "text-gray-400"
+              }`}>
                 {title}
               </span>
               {step < 4 && (
-                <div
-                  className={`w-8 h-0.5 ml-4 ${
-                    step < checkoutStep ? "bg-blue-600" : "bg-gray-200"
-                  }`}
-                />
+                <div className={`w-8 h-0.5 ml-4 ${
+                  step < checkoutStep ? "bg-blue-600" : "bg-gray-200"
+                }`} />
               )}
             </div>
           ))}
@@ -393,7 +389,7 @@ export default function CartPage({ onRefreshCounts }) {
           <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 animate-fade-in">
             {checkoutStep === 1 && (
               <>
-                <div className="flex items-center justify-between mb-6">
+                <div className="mb-6">
                   <h2 className="text-2xl font-bold text-gray-800">{t("selectedCourses")}</h2>
                   {coursesInCart.length > 0 && (
                     <button
@@ -789,28 +785,21 @@ export default function CartPage({ onRefreshCounts }) {
               <h3 className="text-xl font-bold text-gray-800 mb-6">
                 {t("orderSummary")}
               </h3>
-
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-gray-600">
-                  <span>
-                    {t("subtotalLabel", { count: coursesInCart.length })}
-                  </span>
-                  <span>{formatPrice(subtotal)}</span>
+                  <span>{t("subtotalLabel", { count: coursesInCart.length })}</span>
+                  <span className="whitespace-nowrap">{formatPrice(subtotal)}</span>
                 </div>
-
                 {appliedPromo && (
                   <div className="flex justify-between text-green-600">
-                    <span>
-                      {t("discountLabel", { code: appliedPromo.code })}
-                    </span>
-                    <span>-{formatPrice(discountAmount)}</span>
+                    <span>{t("discountLabel", { code: appliedPromo.code })}</span>
+                    <span className="whitespace-nowrap">-{formatPrice(discountAmount)}</span>
                   </div>
                 )}
-
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between text-lg font-bold text-gray-900">
                     <span>{t("totalLabel")}</span>
-                    <span className="text-blue-600">{formatPrice(total)}</span>
+                    <span className="text-blue-600 whitespace-nowrap">{formatPrice(total)}</span>
                   </div>
                 </div>
               </div>
