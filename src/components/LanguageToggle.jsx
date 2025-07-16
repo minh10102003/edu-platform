@@ -1,31 +1,29 @@
-// components/LanguageToggle.jsx
-import React, { useState, useRef, useEffect } from 'react';
-import { useTranslation } from '../hooks/useTranslation.js';
+import React, { useState, useRef, useEffect } from 'react'
+import { useTranslation } from '../context/TranslationContext.jsx'
 
 export default function LanguageToggle() {
-  const { language, setLanguage, availableLanguages } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const { language, setLanguage, availableLanguages } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
-  const currentLang = availableLanguages.find(lang => lang.code === language);
+  if (!availableLanguages) return null
+
+  const currentLang = availableLanguages.find(lang => lang.code === language)
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleLanguageChange = (langCode) => {
-    setLanguage(langCode);
-    setIsOpen(false);
-  };
+    setLanguage(langCode)
+    setIsOpen(false)
+  }
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -34,12 +32,12 @@ export default function LanguageToggle() {
         className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         aria-label="Change language"
       >
-        <span className="text-lg">{currentLang?.flag}</span>
-        <span className="hidden sm:inline text-sm font-medium">{currentLang?.name}</span>
-        <svg 
+        <span className="text-lg">{currentLang.flag}</span>
+        <span className="hidden sm:inline text-sm font-medium">{currentLang.name}</span>
+        <svg
           className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -48,13 +46,13 @@ export default function LanguageToggle() {
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-fade-in">
-          {availableLanguages.map((lang) => (
+          {availableLanguages.map(lang => (
             <button
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
               className={`w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors duration-200 ${
-                language === lang.code 
-                  ? 'bg-blue-50 text-blue-600' 
+                language === lang.code
+                  ? 'bg-blue-50 text-blue-600'
                   : 'text-gray-700'
               }`}
             >
@@ -70,34 +68,32 @@ export default function LanguageToggle() {
         </div>
       )}
     </div>
-  );
+)
 }
 
-// Mobile version
 export function MobileLanguageToggle() {
-  const { language, setLanguage, availableLanguages } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const { language, setLanguage, availableLanguages } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
-  const currentLang = availableLanguages.find(lang => lang.code === language);
+  if (!availableLanguages) return null
+
+  const currentLang = availableLanguages.find(lang => lang.code === language)
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleLanguageChange = (langCode) => {
-    setLanguage(langCode);
-    setIsOpen(false);
-  };
+    setLanguage(langCode)
+    setIsOpen(false)
+  }
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -112,11 +108,11 @@ export function MobileLanguageToggle() {
           <span className="font-medium">Ngôn ngữ / Language</span>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-lg">{currentLang?.flag}</span>
-          <svg 
+          <span className="text-lg">{currentLang.flag}</span>
+          <svg
             className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-            fill="none" 
-            stroke="currentColor" 
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -126,13 +122,13 @@ export function MobileLanguageToggle() {
 
       {isOpen && (
         <div className="mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-1 animate-fade-in">
-          {availableLanguages.map((lang) => (
+          {availableLanguages.map(lang => (
             <button
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
               className={`w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors duration-200 ${
-                language === lang.code 
-                  ? 'bg-blue-50 text-blue-600' 
+                language === lang.code
+                  ? 'bg-blue-50 text-blue-600'
                   : 'text-gray-700'
               }`}
             >

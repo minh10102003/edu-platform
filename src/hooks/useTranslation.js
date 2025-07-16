@@ -1,4 +1,3 @@
-// hooks/useTranslation.js
 import { useState, useEffect } from 'react';
 import { i18n } from '../utils/i18n.js';
 

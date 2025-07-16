@@ -1,5 +1,4 @@
 export const storage = {
-  // Favorites Management
   getFavorites: () => {
     try {
       const saved = localStorage.getItem("favorites")
@@ -51,7 +50,6 @@ export const storage = {
     }
   },
 
-  // Cart Management (Optimized for Online Courses)
   getCart: () => {
     try {
       const saved = localStorage.getItem("cart")
@@ -66,18 +64,15 @@ export const storage = {
     try {
       const cart = storage.getCart()
       
-      // For online courses, we don't need quantity - each course is unique
       const existingItem = cart.find((item) => item.product.id === product.id)
       if (existingItem) {
-        // Course already in cart, don't add duplicate
         return cart
       }
       
-      // Add new course to cart
       cart.push({ 
         product, 
         addedAt: Date.now(),
-        quantity: 1 // Keep quantity for compatibility but always 1 for courses
+        quantity: 1 
       })
       
       localStorage.setItem("cart", JSON.stringify(cart))
@@ -104,15 +99,13 @@ export const storage = {
     }
   },
 
-  // Legacy method for compatibility - not needed for courses but kept for existing code
   updateCartItemQuantity: (productId, quantity) => {
     try {
       const cart = storage.getCart()
       const item = cart.find((i) => i.product.id === productId)
       if (item) {
         if (quantity <= 0) return storage.removeFromCart(productId)
-        // For courses, quantity should always be 1, but update for compatibility
-        item.quantity = Math.min(quantity, 1) // Max 1 for courses
+        item.quantity = Math.min(quantity, 1) 
         localStorage.setItem("cart", JSON.stringify(cart))
       }
       return cart
@@ -133,7 +126,7 @@ export const storage = {
 
   getCartItemsCount: () => {
     try {
-      return storage.getCart().length // For courses, count is just number of unique courses
+      return storage.getCart().length
     } catch (error) {
       console.error("Error getting cart count:", error)
       return 0
@@ -159,7 +152,6 @@ export const storage = {
     }
   },
 
-  // View History Management
   getHistory: () => {
     try {
       const saved = localStorage.getItem("viewHistory")
@@ -177,17 +169,14 @@ export const storage = {
       const existingIndex = history.findIndex((h) => h.product.id === product.id)
       
       if (existingIndex > -1) {
-        // Update existing entry
         const existingItem = history[existingIndex]
         existingItem.viewCount++
-        existingItem.totalViewTime += (now - existingItem.lastViewed) // Rough estimate
+        existingItem.totalViewTime += (now - existingItem.lastViewed) 
         existingItem.lastViewed = now
         
-        // Move to front
         history.splice(existingIndex, 1)
         history.unshift(existingItem)
       } else {
-        // Add new entry
         history.unshift({ 
           product, 
           firstViewed: now, 
@@ -197,7 +186,6 @@ export const storage = {
         })
       }
       
-      // Keep only recent 50 items
       const updated = history.slice(0, 50)
       localStorage.setItem("viewHistory", JSON.stringify(updated))
       storage.trackUserAction("view", product.id, { 
@@ -221,7 +209,6 @@ export const storage = {
     }
   },
 
-  // User Behavior Tracking
   getUserBehavior: () => {
     try {
       const saved = localStorage.getItem("userBehavior")
@@ -233,10 +220,10 @@ export const storage = {
         searchHistory: [],
         cartCategories: {},
         lastActive: Date.now(),
-        enrolledCourses: [], // Track completed enrollments
-        completedCourses: [], // Track course completions
-        studyTime: 0, // Track total study time
-        achievements: [] // Track learning achievements
+        enrolledCourses: [], 
+        completedCourses: [], 
+        studyTime: 0, 
+        achievements: [] 
       }
     } catch (error) {
       console.error("Error getting user behavior:", error)
@@ -276,7 +263,6 @@ export const storage = {
           if (metadata.category) {
             behavior.favoriteCategories[metadata.category] = (behavior.favoriteCategories[metadata.category] || 0) + 1
           } else {
-            // Try to get category from history
             const histItem = storage.getHistory().find((h) => h.product.id === productId)
             if (histItem?.product?.category) {
               behavior.favoriteCategories[histItem.product.category] = 
@@ -297,7 +283,7 @@ export const storage = {
             timestamp: Date.now(),
             resultsCount: metadata.resultsCount || 0,
           })
-          behavior.searchHistory = behavior.searchHistory.slice(-100) // Keep last 100 searches
+          behavior.searchHistory = behavior.searchHistory.slice(-100) 
           break
           
         case "enroll":
@@ -309,7 +295,6 @@ export const storage = {
         case "complete":
           if (!behavior.completedCourses.includes(productId)) {
             behavior.completedCourses.push(productId)
-            // Add achievement for course completion
             behavior.achievements.push({
               type: "course_completion",
               courseId: productId,
@@ -345,37 +330,31 @@ export const storage = {
       const favorites = storage.getFavorites()
       const cart = storage.getCart()
       
-      // Calculate category preferences with weighted scoring
       const categoryScores = {}
       
-      // Weight different actions differently
       Object.entries(behavior.categoryViews).forEach(([category, views]) => {
         categoryScores[category] = (categoryScores[category] || 0) + views * 1
       })
       
       Object.entries(behavior.favoriteCategories).forEach(([category, count]) => {
-        categoryScores[category] = (categoryScores[category] || 0) + count * 5 // Favorites weighted more
+        categoryScores[category] = (categoryScores[category] || 0) + count * 5 
       })
       
       Object.entries(behavior.cartCategories).forEach(([category, count]) => {
-        categoryScores[category] = (categoryScores[category] || 0) + count * 3 // Cart items weighted moderately
+        categoryScores[category] = (categoryScores[category] || 0) + count * 3 
       })
       
-      // Price range preferences
       const priceScores = {}
       Object.entries(behavior.priceRangeViews).forEach(([range, views]) => {
         priceScores[range] = views
       })
       
-      // Calculate average rating preference from viewed products
       const avgRating = history.length 
         ? history.reduce((sum, h) => sum + (h.product.rating || 4.5), 0) / history.length 
         : 4.5
       
-      // Recent categories from last 10 views
       const recentCategories = [...new Set(history.slice(0, 10).map((h) => h.product.category))]
       
-      // Learning progress metrics
       const enrollmentRate = behavior.enrolledCourses.length / Math.max(behavior.totalViews, 1)
       const completionRate = behavior.completedCourses.length / Math.max(behavior.enrolledCourses.length, 1)
       
@@ -424,7 +403,7 @@ export const storage = {
 
   getUserLevel: (behavior) => {
     const completed = behavior.completedCourses?.length || 0
-    const studyHours = (behavior.studyTime || 0) / (1000 * 60 * 60) // Convert to hours
+    const studyHours = (behavior.studyTime || 0) / (1000 * 60 * 60) 
     const totalViews = behavior.totalViews || 0
     
     if (completed >= 10 && studyHours >= 100) return "expert"
@@ -434,7 +413,6 @@ export const storage = {
     return "newcomer"
   },
 
-  // Promo Code Management
   getUsedPromoCodes: () => {
     try {
       const saved = localStorage.getItem("usedPromoCodes")
@@ -459,7 +437,6 @@ export const storage = {
     }
   },
 
-  // User Management
   getAllUsers: () => {
     try {
       const saved = localStorage.getItem("users")
@@ -530,7 +507,6 @@ export const storage = {
     }
   },
 
-  // Data Management
   clearUserData: () => {
     try {
       const keysToRemove = [
@@ -562,7 +538,6 @@ export const storage = {
     }
   },
 
-  // Export/Import functionality for data portability
   exportUserData: () => {
     try {
       const data = {

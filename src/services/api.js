@@ -191,8 +191,6 @@ export const api = {
     const lowerCaseMessage = message.toLowerCase()
     const allCategories = [...new Set(products.map(p => p.category.toLowerCase()))]
 
-    // XỬ LÝ CÁC PATTERN KHÓA HỌC CỤ THỂ
-    // Pattern 1: "khóa học [exact_tag]"
     const exactTagPattern = /khóa học\s+(art|business|design|music|programming|photography|marketing|english|finance|health)/i
     let match = lowerCaseMessage.match(exactTagPattern)
     
@@ -216,8 +214,6 @@ export const api = {
         return { message: responseMessage, productSuggestion }
       }
     }
-
-    // Pattern 2: "khóa học [vietnamese_keywords]"
     const vietnameseKeywords = {
       'tiếng anh': 'english',
       'anh ngữ': 'english',
@@ -253,8 +249,6 @@ export const api = {
         }
       }
     }
-
-    // XỬ LÝ CÁC CÂU HỎI VỀ DANH SÁCH KHÓA HỌC CÓ SẴN
     if (lowerCaseMessage.includes("bạn đang có những khóa học nào") || 
         lowerCaseMessage.includes("các khóa học đang có") ||
         lowerCaseMessage.includes("có những khóa học gì") ||
@@ -271,7 +265,6 @@ export const api = {
       
       responseMessage = `Hiện tại chúng tôi có các danh mục khóa học sau:\n\n${categoriesWithCount.join('\n')}\n\nTổng cộng: ${products.length} khóa học\n\nHãy hỏi cụ thể về danh mục bạn quan tâm, ví dụ: "khóa học programming"`
       
-      // Gợi ý khóa học phổ biến nhất
       const popularCourse = products.sort((a, b) => b.rating * b.reviews - a.rating * a.reviews)[0]
       if (popularCourse) {
         productSuggestion = popularCourse
@@ -280,7 +273,6 @@ export const api = {
       return { message: responseMessage, productSuggestion }
     }
 
-    // XỬ LÝ CÁC CÂU HỎI KHÁC
     if (lowerCaseMessage.includes("chào") || lowerCaseMessage.includes("xin chào")) {
       responseMessage = "Chào bạn! 👋 Tôi là trợ lý AI của EduCommerce. Tôi có thể giúp gì cho bạn hôm nay?"
     } else if (lowerCaseMessage.includes("cho tôi danh sách các khóa học về tiếng anh")) {
@@ -412,12 +404,10 @@ export const api = {
     } else if (lowerCaseMessage.includes("yêu thích")) {
       responseMessage = `Bạn có ${storage.getFavorites().length} sản phẩm yêu thích.`
     } else {
-      // Câu trả lời mặc định với gợi ý
       responseMessage = "Tôi có thể giúp bạn tìm khóa học theo các danh mục sau:\n\n" + 
         allCategories.map(cat => `• ${cat.charAt(0).toUpperCase() + cat.slice(1)}`).join('\n') + 
         "\n\nVí dụ: 'khóa học programming' hoặc 'khóa học tiếng anh'"
       
-      // Gợi ý khóa học phổ biến
       const popularCourses = products.sort((a, b) => b.rating * b.reviews - a.rating * a.reviews)
       if (popularCourses.length > 0) {
         productSuggestion = popularCourses[0]

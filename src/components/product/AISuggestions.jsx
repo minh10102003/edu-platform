@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { api } from "../../services/api.js"
 import { storage } from "../../utils/storage.js"
 
-// Toast notification system
 const createToast = (message, type = "default") => {
   const toast = document.createElement("div")
   const icon = type === "success" ? "✓" : type === "error" ? "⚠" : type === "info" ? "ℹ" : "✓"

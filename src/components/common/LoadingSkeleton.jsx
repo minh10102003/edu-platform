@@ -1,6 +1,5 @@
 "use client"
 
-// Grid Card Skeleton
 export function ProductCardSkeleton() {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
@@ -48,7 +47,6 @@ export function ProductCardSkeleton() {
   )
 }
 
-// List Card Skeleton
 export function ProductListSkeleton() {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
@@ -98,7 +96,6 @@ export function ProductListSkeleton() {
   )
 }
 
-// Grid of skeletons
 export function ProductGridSkeleton({ count = 8 }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -109,7 +106,6 @@ export function ProductGridSkeleton({ count = 8 }) {
   )
 }
 
-// List of skeletons
 export function ProductListSkeletons({ count = 6 }) {
   return (
     <div className="space-y-4">
@@ -120,7 +116,6 @@ export function ProductListSkeletons({ count = 6 }) {
   )
 }
 
-// Search/Filter skeleton
 export function FilterSkeleton() {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-8 animate-pulse">
@@ -150,7 +145,6 @@ export function FilterSkeleton() {
   )
 }
 
-// Hero section skeleton
 export function HeroSkeleton() {
   return (
     <div className="text-center mb-12 animate-pulse">
@@ -165,7 +159,6 @@ export function HeroSkeleton() {
   )
 }
 
-// Full page skeleton
 export function PageSkeleton() {
   return (
     <div className="container mx-auto px-4 py-8">
@@ -179,7 +172,6 @@ export function PageSkeleton() {
   )
 }
 
-// Modal skeleton
 export function ModalSkeleton() {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -241,7 +233,6 @@ export function ModalSkeleton() {
   )
 }
 
-// Default export for backward compatibility
 export default function LoadingSkeleton() {
   return <ProductCardSkeleton />
 }

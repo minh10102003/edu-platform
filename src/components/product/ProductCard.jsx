@@ -3,15 +3,16 @@
 
 import { useState, useEffect } from "react"
 import { storage } from "../../utils/storage.js"
+import { useTranslation } from "../../context/TranslationContext.jsx"
+import i18n from "../../utils/i18n.js"
 
-// Toast notification system
 const createToast = (message, type = "default") => {
   const toast = document.createElement("div")
   const icon = type === "success" ? "✓" : type === "error" ? "⚠" : type === "info" ? "ℹ" : "✓"
   const bgColor = {
     success: "bg-emerald-500",
-    error: "bg-red-500",
-    info: "bg-blue-500",
+    error:   "bg-red-500",
+    info:    "bg-blue-500",
     default: "bg-gray-800"
   }[type]
 
@@ -32,12 +33,15 @@ export default function ProductCard({
   product, 
   onViewDetail, 
   onRefreshCounts, 
-  viewMode = "grid" 
+  viewMode = "grid"
 }) {
+  const { t, currentLanguage: langFromCtx } = useTranslation()
+  const currentLanguage = langFromCtx || i18n.getCurrentLanguage()
+
   const [isFavorite, setIsFavorite] = useState(false)
-  const [isInCart, setIsInCart] = useState(false)
+  const [isInCart, setIsInCart]     = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [imageError, setImageError] = useState(false)
+  const [imageError, setImageError]   = useState(false)
 
   useEffect(() => {
     if (product) {
@@ -53,15 +57,15 @@ export default function ProductCard({
     try {
       if (isFavorite) {
         storage.removeFavorite(product.id)
-        createToast("Đã xóa khỏi danh sách yêu thích", "info")
+        createToast(t("toastRemovedFromFavorites"), "info")
       } else {
         storage.addFavorite(product.id)
-        createToast("Đã thêm vào danh sách yêu thích", "success")
+        createToast(t("toastAddedToFavoritesSingle"), "success")
       }
       setIsFavorite(!isFavorite)
       onRefreshCounts?.()
     } catch (error) {
-      createToast("Có lỗi xảy ra, vui lòng thử lại", "error")
+      createToast(t("error"), "error")
     }
   }
 
@@ -72,41 +76,49 @@ export default function ProductCard({
     try {
       storage.addToCart(product)
       setIsInCart(true)
-      createToast("Đã thêm vào giỏ hàng", "success")
+      createToast(t("toastAddedToCartSingle"), "success")
       onRefreshCounts?.()
     } catch (error) {
-      createToast("Có lỗi xảy ra, vui lòng thử lại", "error")
+      createToast(t("error"), "error")
     }
   }
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("vi-VN", { 
-      style: "currency", 
-      currency: "VND" 
-    }).format(price)
+  const formatPrice = (priceVnd) => {
+    if (currentLanguage === "en") {
+      const priceUsd = priceVnd / 23000
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD"
+      }).format(priceUsd)
+    } else {
+      return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND"
+      }).format(priceVnd)
+    }
   }
 
   const getCategoryColor = (category) => {
     const colors = {
-      art: "bg-pink-50 text-pink-700 border-pink-200",
-      business: "bg-blue-50 text-blue-700 border-blue-200",
-      design: "bg-purple-50 text-purple-700 border-purple-200",
-      music: "bg-green-50 text-green-700 border-green-200",
+      art:         "bg-pink-50 text-pink-700 border-pink-200",
+      business:    "bg-blue-50 text-blue-700 border-blue-200",
+      design:      "bg-purple-50 text-purple-700 border-purple-200",
+      music:       "bg-green-50 text-green-700 border-green-200",
       programming: "bg-orange-50 text-orange-700 border-orange-200",
       photography: "bg-indigo-50 text-indigo-700 border-indigo-200",
-      marketing: "bg-red-50 text-red-700 border-red-200",
-      english: "bg-yellow-50 text-yellow-700 border-yellow-200",
-      finance: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      health: "bg-teal-50 text-teal-700 border-teal-200",
+      marketing:   "bg-red-50 text-red-700 border-red-200",
+      english:     "bg-yellow-50 text-yellow-700 border-yellow-200",
+      finance:     "bg-emerald-50 text-emerald-700 border-emerald-200",
+      health:      "bg-teal-50 text-teal-700 border-teal-200",
     }
     return colors[category?.toLowerCase()] || "bg-gray-50 text-gray-700 border-gray-200"
   }
 
   const getLevelBadge = (level) => {
     const levelConfig = {
-      beginner: { color: "text-green-600", bg: "bg-green-50", dots: 1, label: "Cơ bản" },
-      intermediate: { color: "text-amber-600", bg: "bg-amber-50", dots: 2, label: "Trung cấp" },
-      advanced: { color: "text-red-600", bg: "bg-red-50", dots: 3, label: "Nâng cao" }
+      beginner:     { color: "text-green-600", bg: "bg-green-50", dots: 1, label: t("levelBeginner") },
+      intermediate: { color: "text-amber-600", bg: "bg-amber-50", dots: 2, label: t("levelIntermediate") },
+      advanced:     { color: "text-red-600",   bg: "bg-red-50",   dots: 3, label: t("levelAdvanced") }
     }
     
     const config = levelConfig[level?.toLowerCase()] || levelConfig.beginner
@@ -145,7 +157,6 @@ export default function ProductCard({
     return <div className="bg-gray-100 rounded-xl h-96 animate-pulse" />
   }
 
-  // List view layout
   if (viewMode === "list") {
     return (
       <div
@@ -193,7 +204,9 @@ export default function ProductCard({
                 <div className="flex items-center gap-1">
                   {renderStars(product.rating)}
                   <span className="font-medium text-sm text-gray-900 ml-1">{product.rating}</span>
-                  <span className="text-gray-500 text-xs">({product.reviews})</span>
+                  <span className="text-gray-500 text-xs">
+                    ({product.reviews} {t("reviews")})
+                  </span>
                 </div>
                 {getLevelBadge(product.level)}
               </div>
@@ -209,7 +222,7 @@ export default function ProductCard({
                       ? "bg-red-500 text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-500"
                   }`}
-                  aria-label={isFavorite ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích"}
+                  aria-label={isFavorite ? t("removeFromFavorites") : t("addToFavorites")}
                 >
                   <svg className="w-4 h-4" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -224,7 +237,7 @@ export default function ProductCard({
                       : "bg-blue-600 text-white hover:bg-blue-700"
                   }`}
                 >
-                  {isInCart ? "Đã thêm" : "Thêm vào giỏ"}
+                  {isInCart ? t("addedToCart") : t("addToCart")}
                 </button>
               </div>
             </div>
@@ -234,7 +247,6 @@ export default function ProductCard({
     )
   }
 
-  // Grid view layout
   return (
     <div
       className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 cursor-pointer card-hover"
@@ -277,7 +289,7 @@ export default function ProductCard({
               ? "bg-red-500 text-white shadow-md"
               : "bg-white/90 text-gray-600 hover:bg-white hover:text-red-500"
           }`}
-          aria-label={isFavorite ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích"}
+          aria-label={isFavorite ? t("removeFromFavorites") : t("addToFavorites")}
         >
           <svg
             className="w-4 h-4"
@@ -307,7 +319,7 @@ export default function ProductCard({
           <div className="flex items-center gap-1">
             {renderStars(product.rating)}
             <span className="font-medium text-sm text-gray-900 ml-1">{product.rating}</span>
-            <span className="text-gray-500 text-xs">({product.reviews})</span>
+            <span className="text-gray-500 text-xs">({product.reviews} {t("reviews")})</span>
           </div>
           {getLevelBadge(product.level)}
         </div>
@@ -331,7 +343,7 @@ export default function ProductCard({
                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 21H19a1 1 0 001-1v-1M7 13l-2.293-2.293c-.63-.63-.184-1.707.707-1.707H17"
               />
             </svg>
-            <span>{isInCart ? "Đã thêm" : "Thêm vào giỏ"}</span>
+            <span>{isInCart ? t("addedToCart") : t("addToCart")}</span>
           </button>
         </div>
       </div>

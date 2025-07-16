@@ -1,197 +1,572 @@
-// utils/i18n.js
 const translations = {
   vi: {
-    // Navigation
     home: "Trang chủ",
     favorites: "Yêu thích",
     history: "Lịch sử",
     cart: "Giỏ hàng",
     login: "Đăng nhập",
-    
-    // HomePage
+
+    featureCertificate: "Chứng chỉ hoàn thành",
+    featureLifetime: "Học trọn đời",
+    featureSupport: "Hỗ trợ 24/7",
+
     heroTitle: "Khám phá thế giới kiến thức",
     heroSubtitle: "Học tập trực tuyến với hàng nghìn khóa học chất lượng cao từ các chuyên gia hàng đầu",
-    getStarted: "Bắt đầu ngay",
-    exploreMore: "Khám phá thêm",
-    featuredCourses: "Khóa học nổi bật",
-    categories: "Danh mục",
-    viewAll: "Xem tất cả",
-    
-    // Product/Course related
-    addToCart: "Thêm vào giỏ hàng",
+    searchPlaceholder: "Tìm kiếm khóa học... (VD: lập trình, tiếng anh, thiết kế)",
+    allCategories: "Tất cả danh mục",
+    price: "Giá",
+    priceRange: "Khoảng giá",
+    priceFrom: "Giá từ",
+    priceTo: "Giá đến",
+    dragToSelectPrice: "Kéo để chọn khoảng giá",
+    apply: "Áp dụng",
+    reset: "Đặt lại",
+    selectedPriceRange: "Khoảng giá đã chọn",
+    default: "Mặc định",
+    nameAsc: "Tên A–Z",
+    nameDesc: "Tên Z–A",
+    priceAsc: "Giá thấp đến cao",
+    priceDesc: "Giá cao đến thấp",
+    ratingDesc: "Đánh giá cao nhất",
+    loadingCourses: "Đang tải khóa học...",
+    errorLoading: "Không thể tải sản phẩm. Vui lòng thử lại sau.",
+    errorOccurred: "Có lỗi xảy ra",
+    retry: "Thử lại",
+    perPage6: "6 / trang",
+    perPage12: "12 / trang",
+    perPage18: "18 / trang",
+    perPage24: "24 / trang",
+    searchFilter: "Tìm kiếm",
+    categoryFilter: "Danh mục",
+    priceFilterActive: "Giá",
+    gridView: "Chế độ lưới",
+    listView: "Chế độ danh sách",
+    clearAllFilters: "Xóa tất cả bộ lọc",
+    resultsCount: "Hiển thị",
+    of: "của",
+    courses: "khóa học",
+    forSearchTerm: "cho",
+    pageInfo: "Trang",
+    noResultsTitle: "Không tìm thấy khóa học nào",
+    noResultsText: "Thử điều chỉnh bộ lọc hoặc tìm kiếm từ khóa khác",
+
+    loadingFavorites: "Đang tải danh sách yêu thích...",
+    errorLoadingFavorites: "Không thể tải sản phẩm. Vui lòng thử lại sau.",
+    favoritesPageTitle: "Khóa học yêu thích",
+    favoritesPageSubtitle: "Tập hợp những khóa học bạn quan tâm nhất để theo dõi và đăng ký khi phù hợp",
+    exploreCourses: "Khám phá khóa học",
+    emptyFavoritesTitle: "Chưa có khóa học yêu thích",
+    emptyFavoritesText: "Hãy khám phá và thêm các khóa học bạn quan tâm vào danh sách yêu thích!",
+    statsFavoritesCount: "Khóa học yêu thích",
+    statsTotalValue: "Tổng giá trị",
+    statsAvgRating: "Đánh giá trung bình",
+    statsUniqueCategories: "Danh mục khác nhau",
+
+    searchFavoritesPlaceholder: "Tìm kiếm khóa học yêu thích...",
+    newest: "Mới nhất",
+    clearFilters: "Xóa bộ lọc",
+    addAllToCart: "Thêm tất cả vào giỏ",
+    clearAllFavorites: "Xóa tất cả",
+    favoritesStatsDisplay: "Hiển thị {{count}} / {{total}} khóa học",
+
+    toastClearedFavorites: "Đã xóa toàn bộ danh sách yêu thích",
+    toastAddedToCartCount: "Đã thêm {{count}} khóa học vào giỏ hàng",
+    toastAllInCart: "Tất cả khóa học đã có trong giỏ hàng",
+
+    confirmClearFavoritesTitle: "Xóa tất cả yêu thích",
+    confirmClearFavoritesMessage:
+      "Bạn có chắc chắn muốn xóa toàn bộ danh sách yêu thích không? Hành động này không thể hoàn tác.",
+
+    loadingHistory: "Đang tải lịch sử xem...",
+    errorLoadingHistory: "Không thể tải lịch sử xem. Vui lòng thử lại sau.",
+    historyPageTitle: "Lịch sử xem khóa học",
+    historyPageSubtitle: "Theo dõi hành trình học tập của bạn và dễ dàng quay lại các khóa học đã xem",
+    emptyHistoryTitle: "Chưa có lịch sử xem",
+    emptyHistoryText: "Hãy khám phá các khóa học để bắt đầu hành trình học tập!",
+    statsViewedCount: "Khóa học đã xem",
+    statsTotalViews: "Tổng lượt xem",
+    statsViewTime: "Thời gian xem",
+    statsUniqueCategories: "Danh mục đã xem",
+    searchHistoryPlaceholder: "Tìm kiếm lịch sử xem...",
+    allTime: "Tất cả thời gian",
+    last7Days: "7 ngày qua",
+    last30Days: "30 ngày qua",
+    thisYear: "Năm nay",
+    noResultsTitle: "Không tìm thấy kết quả",
+    noResultsText: "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm",
+    addAllToFavorites: "Yêu thích tất cả",
+    clearAllHistory: "Xóa tất cả lịch sử xem",
+    viewsCountLabel: "lượt xem",
+    lastViewed: "Lần cuối",
+    viewDetail: "Xem chi tiết",
+    toastClearedHistory: "Đã xóa toàn bộ lịch sử xem",
+    toastAddedToFavorites: "Đã thêm {{count}} khóa học vào yêu thích",
+    toastAllInFavorites: "Tất cả khóa học đã có trong danh sách yêu thích",
+    confirmClearHistoryTitle: "Xóa toàn bộ lịch sử",
+    confirmClearHistoryMessage:
+      "Bạn có chắc chắn muốn xóa toàn bộ lịch sử xem không? Hành động này không thể hoàn tác.",
+
+    addToCart: "Thêm vào giỏ",
     addToFavorites: "Thêm vào yêu thích",
     removeFromFavorites: "Xóa khỏi yêu thích",
-    price: "Giá",
     originalPrice: "Giá gốc",
     rating: "Đánh giá",
     students: "học viên",
     instructor: "Giảng viên",
-    
-    // Cart
-    yourCart: "Giỏ hàng của bạn",
-    emptyCart: "Giỏ hàng trống",
-    emptyCartMessage: "Bạn chưa có khóa học nào trong giỏ hàng",
-    continueShopping: "Tiếp tục mua sắm",
-    total: "Tổng cộng",
-    checkout: "Thanh toán",
-    remove: "Xóa",
-    
-    // Favorites
-    yourFavorites: "Khóa học yêu thích",
-    emptyFavorites: "Chưa có khóa học yêu thích",
-    emptyFavoritesMessage: "Bạn chưa thêm khóa học nào vào danh sách yêu thích",
-    
-    // History
-    purchaseHistory: "Lịch sử mua hàng",
-    emptyHistory: "Chưa có lịch sử mua hàng",
-    emptyHistoryMessage: "Bạn chưa mua khóa học nào",
-    purchaseDate: "Ngày mua",
-    amount: "Số tiền",
-    
-    // Auth
+
+    toastRemovedFavorite: "Đã xóa khỏi danh sách yêu thích",
+    toastAddedFavorite: "Đã thêm vào danh sách yêu thích",
+    toastErrorOccurred: "Có lỗi xảy ra, vui lòng thử lại",
+    toastAddedToCart: "Đã thêm vào giỏ",
+    modalCloseAria: "Đóng modal",
+    productDescription: "Mô tả khóa học",
+    productDetails: "Thông tin chi tiết",
+    labelDuration: "Thời lượng",
+    labelLanguage: "Ngôn ngữ",
+    labelCertificate: "Chứng chỉ",
+    whatYouLearn: "Bạn sẽ học được gì",
+    requirements: "Yêu cầu",
+    refundPolicy: "30 ngày hoàn tiền",
+    lifetimeAccess: "Truy cập trọn đời",
+    certificateCompletion: "Chứng chỉ hoàn thành",
+    alreadyInCart: "Đã thêm vào giỏ",
+
+    errorLoadingCartData: "Không thể tải dữ liệu giỏ hàng. Vui lòng thử lại sau.",
+    loadingCart: "Đang tải giỏ hàng...",
+    emptyCartTitle: "Giỏ hàng trống",
+    emptyCartText: "Bạn chưa có khóa học nào trong giỏ hàng",
+    removeCourseTitle: "Xóa khóa học",
+    removeCourseMessage: "Bạn có chắc chắn muốn xóa khóa học này khỏi giỏ hàng không?",
+    toastRemovedCourse: "Đã xóa khóa học khỏi giỏ hàng",
+    clearCartTitle: "Xóa toàn bộ giỏ hàng",
+    clearCartMessage: "Bạn có chắc chắn muốn xóa toàn bộ khóa học khỏi giỏ hàng không?",
+    toastClearedCart: "Đã xóa toàn bộ giỏ hàng",
+    promoEmptyError: "Vui lòng nhập mã khuyến mãi.",
+    promoInvalidError: "Mã khuyến mãi không hợp lệ.",
+    toastPromoInvalid: "Mã khuyến mãi không hợp lệ!",
+    promoMinOrderError: "Đơn hàng tối thiểu {{amount}} để áp dụng mã này.",
+    toastPromoMinError: "Không đủ điều kiện áp dụng mã!",
+    toastPromoApplied: "Áp dụng mã {{code}} thành công! Giảm {{percent}}%",
+    toastPromoRemoved: "Đã hủy mã khuyến mãi",
+    toastCartEmpty: "Giỏ hàng của bạn đang trống!",
+    stepCart: "Giỏ hàng",
+    stepInfo: "Thông tin",
+    stepPayment: "Thanh toán",
+    stepConfirm: "Hoàn thành",
+    cartPageTitle: "Giỏ hàng của bạn",
+    infoPageTitle: "Thông tin học viên",
+    paymentPageTitle: "Phương thức thanh toán",
+    confirmPageTitle: "Đăng ký thành công!",
+    labelName: "Họ và tên",
+    placeholderName: "Nguyễn Văn A",
+    labelEmail: "Email",
+    placeholderEmail: "example@email.com",
+    labelPhone: "Số điện thoại",
+    placeholderPhone: "0901234567",
+    labelMotivation: "Mục tiêu học tập",
+    optional: "tùy chọn",
+    placeholderMotivation:
+      "Chia sẻ mục tiêu học tập của bạn để chúng tôi hỗ trợ tốt hơn...",
+    back: "Quay lại",
+    continue: "Tiếp tục",
+    proceedToRegister: "Tiếp tục đăng ký",
+    removeCourseAria: "Xóa khóa học",
+    reviewsLabel: "đánh giá",
+    completeRegistration: "Hoàn tất đăng ký",
+    confirmSuccessTitle: "Đăng ký thành công!",
+    confirmThankYou:
+      "Cảm ơn bạn đã đăng ký. Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất.",
+    registrationInfoTitle: "Thông tin đăng ký:",
+    labelEnrollmentId: "Mã đăng ký:",
+    labelStudent: "Học viên:",
+    labelCoursesCount: "Số khóa học:",
+    coursesLabel: "khóa",
+    labelTotalFee: "Tổng học phí:",
+    orderSummary: "Tóm tắt đơn hàng",
+    subtotalLabel: "Tạm tính ({{count}} khóa học):",
+    discountLabel: "Giảm giá ({{code}}):",
+    totalLabel: "Tổng cộng:",
+    promoCodeTitle: "Mã khuyến mãi",
+    placeholderPromoCode: "Nhập mã khuyến mãi",
+    applyPromo: "Áp dụng",
+    availablePromoTitle: "Mã khuyến mãi có sẵn:",
+    selectedCourses: "Khóa học đã chọn",
+    clearAllCart: "Xóa tất cả",
+
+    cartPageHeader: "Giỏ hàng của bạn",
+    infoPageHeader: "Thông tin học viên",
+    paymentPageHeader: "Phương thức thanh toán",
+    confirmationPageHeader: "Đăng ký thành công!",
+
+    paymentCreditCard: "Thẻ tín dụng/Ghi nợ",
+    paymentCreditDesc: "Visa, Mastercard, JCB",
+    paymentBankTransfer: "Chuyển khoản ngân hàng",
+    paymentBankDesc: "Chuyển khoản qua internet banking",
+    paymentEwallet: "Ví điện tử",
+    paymentEwalletDesc: "MoMo, ZaloPay, VNPay",
+    paymentInstallment: "Trả góp 0%",
+    paymentInstallmentDesc: "Chia nhỏ học phí thành nhiều tháng",
+    securePayment: "Thanh toán an toàn và bảo mật 100%",
+
+    authEmailLabel: "Địa chỉ Email",
+    authPasswordLabel: "Mật khẩu",
+    authConfirmPasswordLabel: "Xác nhận mật khẩu",
+    authEmailPlaceholder: "your@example.com",
+    authPasswordPlaceholder: "••••••••",
+
+    passwordStrengthVeryWeak: "Rất yếu",
+    passwordStrengthWeak: "Yếu",
+    passwordStrengthMedium: "Trung bình",
+    passwordStrengthStrong: "Mạnh",
+    passwordStrengthVeryStrong: "Rất mạnh",
+
+    errorFillFields: "Vui lòng điền đầy đủ email và mật khẩu.",
+    errorPasswordMismatch: "Mật khẩu xác nhận không khớp.",
+    errorPasswordWeak: "Mật khẩu quá yếu. Vui lòng sử dụng mật khẩu mạnh hơn.",
+
+    successLogin: "Đăng nhập thành công! (Chức năng giả lập)",
+    successSignup: "Đăng ký thành công! (Chức năng giả lập)",
+
     signIn: "Đăng nhập",
     signUp: "Đăng ký",
-    email: "Email",
-    password: "Mật khẩu",
-    confirmPassword: "Xác nhận mật khẩu",
-    fullName: "Họ và tên",
-    alreadyHaveAccount: "Đã có tài khoản?",
     dontHaveAccount: "Chưa có tài khoản?",
-    forgotPassword: "Quên mật khẩu?",
-    
-    // Footer
-    footerDescription: "Nền tảng học tập trực tuyến hàng đầu với hàng nghìn khóa học chất lượng cao từ các chuyên gia trong ngành.",
-    quickLinks: "Liên kết nhanh",
-    aboutUs: "Về chúng tôi",
-    courses: "Khóa học",
-    instructors: "Giảng viên",
-    blog: "Blog",
-    support: "Hỗ trợ",
-    privacyPolicy: "Chính sách bảo mật",
-    termsOfService: "Điều khoản dịch vụ",
-    contact: "Liên hệ",
-    faq: "FAQ",
-    copyright: "© 2025 EduCommerce. Tất cả quyền được bảo lưu.",
-    
-    // Common
-    loading: "Đang tải...",
-    error: "Lỗi",
-    success: "Thành công",
-    cancel: "Hủy",
-    confirm: "Xác nhận",
-    save: "Lưu",
-    edit: "Chỉnh sửa",
-    delete: "Xóa",
-    search: "Tìm kiếm",
-    filter: "Lọc",
-    sort: "Sắp xếp",
-    
-    // Categories
-    programming: "Lập trình",
-    design: "Thiết kế",
-    business: "Kinh doanh",
-    marketing: "Marketing",
-    music: "Âm nhạc",
-    photography: "Nhiếp ảnh",
+    alreadyHaveAccount: "Đã có tài khoản?",
+    backToHome: "Quay lại trang chủ",
+
+    addToCart: "Thêm vào giỏ",
+    addToFavorites: "Thêm vào yêu thích",
+    removeFromFavorites: "Xóa khỏi yêu thích",
+    originalPrice: "Giá gốc",
+    rating: "Đánh giá",
+    students: "học viên",
+    instructor: "Giảng viên",
+
+    close: "Đóng",
+    reviews: "đánh giá",
+    toastRemovedFromFavorites: "Đã xóa khỏi danh sách yêu thích",
+    toastAddedToFavoritesSingle: "Đã thêm vào danh sách yêu thích",
+    toastAddedToCartSingle: "Đã thêm vào giỏ",
+    courseDescription: "Mô tả khóa học",
+    courseDetails: "Thông tin chi tiết",
+    whatYouWillLearn: "Bạn sẽ học được gì",
+    learnOutcome1: "Nắm vững kiến thức cơ bản và nâng cao",
+    learnOutcome2: "Thực hành với các dự án thực tế",
+    learnOutcome3: "Phát triển kỹ năng chuyên môn",
+    learnOutcome4: "Nhận chứng chỉ hoàn thành khóa học",
+    requirements: "Yêu cầu",
+    requirement1: "Máy tính có kết nối Internet",
+    requirement2: "Tinh thần học hỏi và kiên trì",
+    requirement3: "Không yêu cầu kiến thức trước",
+    refund30Days: "30 ngày hoàn tiền",
+    lifetimeAccess: "Truy cập trọn đời",
+    certificate: "Chứng chỉ",
+    yes: "Có",
+    certificateOfCompletion: "Chứng chỉ hoàn thành",
+    addedToCart: "Đã thêm vào giỏ hàng",
+
+    levelBeginner: "Cơ bản",
+    levelIntermediate: "Trung cấp",
+    levelAdvanced: "Nâng cao",
+
+    duration: "Thời lượng",
     language: "Ngôn ngữ",
-    health: "Sức khỏe"
+
+    footerDescription: "Nền tảng học tập trực tuyến hàng đầu với hàng nghìn khóa học chất lượng cao từ các chuyên gia trong ngành.",
+    quickLinks:        "Liên kết nhanh",
+    aboutUs:           "Về chúng tôi",
+    courses:           "Khóa học",
+    instructors:       "Giảng viên",
+    blog:              "Blog",
+    support:           "Hỗ trợ",
+    privacyPolicy:     "Chính sách bảo mật",
+    termsOfService:    "Điều khoản dịch vụ",
+    contact:           "Liên hệ",
+    faq:               "FAQ",
+    copyright:         "© 2025 EduCommerce. Tất cả quyền được bảo lưu.",
   },
-  
+
   en: {
-    // Navigation
     home: "Home",
     favorites: "Favorites",
     history: "History",
     cart: "Cart",
     login: "Login",
-    
-    // HomePage
+
+    featureCertificate: "Certificate of Completion",
+    featureLifetime: "Lifetime Access",
+    featureSupport: "24/7 Support",
+
     heroTitle: "Discover the World of Knowledge",
     heroSubtitle: "Learn online with thousands of high-quality courses from industry experts",
-    getStarted: "Get Started",
-    exploreMore: "Explore More",
-    featuredCourses: "Featured Courses",
-    categories: "Categories",
-    viewAll: "View All",
-    
-    // Product/Course related
+    searchPlaceholder: "Search courses… (e.g. programming, English, design)",
+    allCategories: "All categories",
+    price: "Price",
+    priceRange: "Price range",
+    priceFrom: "From",
+    priceTo: "To",
+    dragToSelectPrice: "Drag to select price",
+    apply: "Apply",
+    reset: "Reset",
+    selectedPriceRange: "Selected range",
+    default: "Default",
+    nameAsc: "Name A–Z",
+    nameDesc: "Name Z–A",
+    priceAsc: "Price: Low to High",
+    priceDesc: "Price: High to Low",
+    ratingDesc: "Top Rated",
+    loadingCourses: "Loading courses…",
+    errorLoading: "Cannot load products. Please try again later.",
+    errorOccurred: "An error occurred",
+    retry: "Retry",
+    perPage6: "6 / page",
+    perPage12: "12 / page",
+    perPage18: "18 / page",
+    perPage24: "24 / page",
+    searchFilter: "Search",
+    categoryFilter: "Category",
+    priceFilterActive: "Price",
+    gridView: "Grid view",
+    listView: "List view",
+    clearAllFilters: "Clear all filters",
+    resultsCount: "Showing",
+    of: "of",
+    courses: "courses",
+    forSearchTerm: "for",
+    pageInfo: "Page",
+    noResultsTitle: "No courses found",
+    noResultsText: "Try adjusting filters or search term",
+
+    loadingFavorites: "Loading favorites...",
+    errorLoadingFavorites: "Unable to load products. Please try again later.",
+    favoritesPageTitle: "Favorite Courses",
+    favoritesPageSubtitle: "Gather the courses you’re most interested in to follow up and enroll when you’re ready",
+    exploreCourses: "Explore Courses",
+    emptyFavoritesTitle: "No favorite courses",
+    emptyFavoritesText: "Discover and add the courses you care about to your favorites list!",
+    statsFavoritesCount: "Favorite Courses",
+    statsTotalValue: "Total Value",
+    statsAvgRating: "Average Rating",
+    statsUniqueCategories: "Unique Categories",
+
+    searchFavoritesPlaceholder: "Search favorite courses...",
+    newest: "Newest",
+    clearFilters: "Clear filters",
+    addAllToCart: "Add all to cart",
+    clearAllFavorites: "Clear all",
+    favoritesStatsDisplay: "Showing {{count}} of {{total}} courses",
+
+    toastClearedFavorites: "All favorites cleared",
+    toastAddedToCartCount: "Added {{count}} courses to cart",
+    toastAllInCart: "All courses are already in cart",
+
+    confirmClearFavoritesTitle: "Clear all favorites",
+    confirmClearFavoritesMessage:
+      "Are you sure you want to remove all favorites? This action cannot be undone.",
+
+    loadingHistory: "Loading history…",
+    errorLoadingHistory: "Cannot load history. Please try again later.",
+    historyPageTitle: "Viewing History",
+    historyPageSubtitle: "Track your learning journey and easily return to courses you’ve viewed",
+    emptyHistoryTitle: "No viewing history",
+    emptyHistoryText: "Discover courses to start learning!",
+    statsViewedCount: "Courses viewed",
+    statsTotalViews: "Total views",
+    statsViewTime: "View time",
+    statsUniqueCategories: "Categories viewed",
+    searchHistoryPlaceholder: "Search history…",
+    allTime: "All time",
+    last7Days: "Last 7 days",
+    last30Days: "Last 30 days",
+    thisYear: "This year",
+    noResultsTitle: "No results found",
+    noResultsText: "Try adjusting filters or search term",
+    addAllToFavorites: "Add all to favorites",
+    clearAllHistory: "Clear all history",
+    viewsCountLabel: "views",
+    lastViewed: "Last viewed",
+    viewDetail: "View detail",
+    toastClearedHistory: "All history cleared",
+    toastAddedToFavorites: "Added {{count}} courses to favorites",
+    toastAllInFavorites: "All courses already in favorites",
+    confirmClearHistoryTitle: "Clear all history",
+    confirmClearHistoryMessage:
+      "Are you sure you want to clear all viewing history? This cannot be undone.",
+
     addToCart: "Add to Cart",
     addToFavorites: "Add to Favorites",
     removeFromFavorites: "Remove from Favorites",
-    price: "Price",
     originalPrice: "Original Price",
     rating: "Rating",
     students: "students",
     instructor: "Instructor",
-    
-    // Cart
-    yourCart: "Your Cart",
-    emptyCart: "Empty Cart",
-    emptyCartMessage: "You don't have any courses in your cart",
-    continueShopping: "Continue Shopping",
-    total: "Total",
-    checkout: "Checkout",
-    remove: "Remove",
-    
-    // Favorites
-    yourFavorites: "Your Favorites",
-    emptyFavorites: "No Favorite Courses",
-    emptyFavoritesMessage: "You haven't added any courses to your favorites",
-    
-    // History
-    purchaseHistory: "Purchase History",
-    emptyHistory: "No Purchase History",
-    emptyHistoryMessage: "You haven't purchased any courses yet",
-    purchaseDate: "Purchase Date",
-    amount: "Amount",
-    
-    // Auth
+
+    toastRemovedFavorite: "Removed from favorites",
+    toastAddedFavorite: "Added to favorites",
+    toastErrorOccurred: "An error occurred, please try again",
+    toastAddedToCart: "Added to cart",
+    modalCloseAria: "Close modal",
+    productDescription: "Course description",
+    productDetails: "Course details",
+    labelDuration: "Duration",
+    labelLanguage: "Language",
+    labelCertificate: "Certificate",
+    whatYouLearn: "What you'll learn",
+    requirements: "Requirements",
+    refundPolicy: "30-day money-back guarantee",
+    lifetimeAccess: "Lifetime access",
+    certificateCompletion: "Certificate of completion",
+    alreadyInCart: "Added to cart",
+
+    errorLoadingCartData: "Unable to load cart data. Please try again later.",
+    loadingCart: "Loading cart...",
+    emptyCartTitle: "Empty Cart",
+    emptyCartText: "You don't have any courses in your cart",
+    removeCourseTitle: "Remove Course",
+    removeCourseMessage: "Are you sure you want to remove this course from your cart?",
+    toastRemovedCourse: "Course removed from cart",
+    clearCartTitle: "Clear Cart",
+    clearCartMessage: "Are you sure you want to clear your cart?",
+    toastClearedCart: "Cart cleared",
+    promoEmptyError: "Please enter a promo code.",
+    promoInvalidError: "Invalid promo code.",
+    toastPromoInvalid: "Invalid promo code!",
+    promoMinOrderError: "Minimum order {{amount}} required to apply this code.",
+    toastPromoMinError: "Not eligible for this promo!",
+    toastPromoApplied: "Promo {{code}} applied! {{percent}}% off",
+    toastPromoRemoved: "Promo code removed",
+    toastCartEmpty: "Your cart is empty!",
+    stepCart: "Cart",
+    stepInfo: "Information",
+    stepPayment: "Payment",
+    stepConfirm: "Confirmation",
+    cartPageTitle: "Your Cart",
+    infoPageTitle: "Student Information",
+    paymentPageTitle: "Payment Method",
+    confirmPageTitle: "Registration Successful!",
+    labelName: "Full Name",
+    placeholderName: "Nguyễn Văn A",
+    labelEmail: "Email",
+    placeholderEmail: "example@email.com",
+    labelPhone: "Phone Number",
+    placeholderPhone: "0901234567",
+    labelMotivation: "Learning Goals",
+    optional: "optional",
+    placeholderMotivation: "Share your learning goals so we can support you better…",
+    back: "Back",
+    continue: "Continue",
+    proceedToRegister: "Proceed to Register",
+    removeCourseAria: "Remove course",
+    reviewsLabel: "reviews",
+    completeRegistration: "Complete Registration",
+    confirmSuccessTitle: "Registration Successful!",
+    confirmThankYou: "Thank you for registering. We'll be in touch soon.",
+    registrationInfoTitle: "Registration Details:",
+    labelEnrollmentId: "Enrollment ID:",
+    labelStudent: "Student:",
+    labelCoursesCount: "Courses:",
+    coursesLabel: "courses",
+    labelTotalFee: "Total Fee:",
+    orderSummary: "Order Summary",
+    subtotalLabel: "Subtotal ({{count}} courses):",
+    discountLabel: "Discount ({{code}}):",
+    totalLabel: "Total:",
+    promoCodeTitle: "Promo Code",
+    placeholderPromoCode: "Enter promo code",
+    applyPromo: "Apply",
+    availablePromoTitle: "Available Promo Codes:",
+    selectedCourses: "Selected Courses",
+    clearAllCart: "Clear all",
+
+    cartPageHeader: "Your Cart",
+    infoPageHeader: "Student Information",
+    paymentPageHeader: "Payment Method",
+    confirmationPageHeader: "Registration Complete!",
+
+    paymentCreditCard: "Credit/Debit Card",
+    paymentCreditDesc: "Visa, Mastercard, JCB",
+    paymentBankTransfer: "Bank Transfer",
+    paymentBankDesc: "Internet banking",
+    paymentEwallet: "E‑wallet",
+    paymentEwalletDesc: "MoMo, ZaloPay, VNPay",
+    paymentInstallment: "0% Installment",
+    paymentInstallmentDesc: "Split fee into months",
+    securePayment: "Secure payment",
+
+    authEmailLabel: "Email Address",
+    authPasswordLabel: "Password",
+    authConfirmPasswordLabel: "Confirm Password",
+    authEmailPlaceholder: "your@example.com",
+    authPasswordPlaceholder: "••••••••",
+
+    passwordStrengthVeryWeak: "Very weak",
+    passwordStrengthWeak: "Weak",
+    passwordStrengthMedium: "Medium",
+    passwordStrengthStrong: "Strong",
+    passwordStrengthVeryStrong: "Very strong",
+
+    errorFillFields: "Please enter both email and password.",
+    errorPasswordMismatch: "Passwords do not match.",
+    errorPasswordWeak: "Password is too weak. Please choose a stronger password.",
+
+    successLogin: "Login successful! (Simulated)",
+    successSignup: "Sign up successful! (Simulated)",
+
     signIn: "Sign In",
     signUp: "Sign Up",
-    email: "Email",
-    password: "Password",
-    confirmPassword: "Confirm Password",
-    fullName: "Full Name",
-    alreadyHaveAccount: "Already have an account?",
     dontHaveAccount: "Don't have an account?",
-    forgotPassword: "Forgot Password?",
-    
-    // Footer
-    footerDescription: "Leading online learning platform with thousands of high-quality courses from industry experts.",
-    quickLinks: "Quick Links",
-    aboutUs: "About Us",
-    courses: "Courses",
-    instructors: "Instructors",
-    blog: "Blog",
-    support: "Support",
-    privacyPolicy: "Privacy Policy",
-    termsOfService: "Terms of Service",
-    contact: "Contact",
-    faq: "FAQ",
-    copyright: "© 2025 EduCommerce. All rights reserved.",
-    
-    // Common
-    loading: "Loading...",
-    error: "Error",
-    success: "Success",
-    cancel: "Cancel",
-    confirm: "Confirm",
-    save: "Save",
-    edit: "Edit",
-    delete: "Delete",
-    search: "Search",
-    filter: "Filter",
-    sort: "Sort",
-    
-    // Categories
-    programming: "Programming",
-    design: "Design",
-    business: "Business",
-    marketing: "Marketing",
-    music: "Music",
-    photography: "Photography",
+    alreadyHaveAccount: "Already have an account?",
+    backToHome: "Back to Home",
+
+    addToCart: "Add to Cart",
+    addToFavorites: "Add to Favorites",
+    removeFromFavorites: "Remove from Favorites",
+    originalPrice: "Original Price",
+    rating: "Rating",
+    students: "students",
+    instructor: "Instructor",
+
+    close: "Close",
+    reviews: "reviews",
+    toastRemovedFromFavorites: "Removed from favorites",
+    toastAddedToFavoritesSingle: "Added to favorites",
+    toastAddedToCartSingle: "Added to cart",
+    courseDescription: "Course description",
+    courseDetails: "Course details",
+    whatYouWillLearn: "What you'll learn",
+    learnOutcome1: "Master both basic and advanced concepts",
+    learnOutcome2: "Practice with real projects",
+    learnOutcome3: "Develop professional skills",
+    learnOutcome4: "Earn a certificate of completion",
+    requirements: "Requirements",
+    requirement1: "Internet‑connected device",
+    requirement2: "Motivation and persistence",
+    requirement3: "No prior knowledge required",
+    refund30Days: "30‑day money‑back guarantee",
+    lifetimeAccess: "Lifetime access",
+    certificate: "Certificate",
+    yes: "Yes",
+    certificateOfCompletion: "Certificate of completion",
+    addedToCart: "Added to cart",
+
+    levelBeginner: "Beginner",
+    levelIntermediate: "Intermediate",
+    levelAdvanced: "Advanced",
+
+    duration: "Duration",
     language: "Language",
-    health: "Health"
+
+    footerDescription: "Leading online learning platform with thousands of high‑quality courses from industry experts.",
+    quickLinks:        "Quick Links",
+    aboutUs:           "About Us",
+    courses:           "Courses",
+    instructors:       "Instructors",
+    blog:              "Blog",
+    support:           "Support",
+    privacyPolicy:     "Privacy Policy",
+    termsOfService:    "Terms of Service",
+    contact:           "Contact",
+    faq:               "FAQ",
+    copyright:         "© 2025 EduCommerce. All rights reserved.",
   }
 };
 
@@ -222,34 +597,43 @@ class I18n {
     return this.currentLanguage;
   }
 
-  t(key, defaultValue = key) {
-    const keys = key.split('.');
-    let value = translations[this.currentLanguage];
-    
-    for (const k of keys) {
-      value = value?.[k];
-      if (value === undefined) break;
+  /**
+   * Lấy chuỗi dịch theo key và thay các placeholder {name} hay {{name}} với params.
+   * @param {string} key
+   * @param {object} params
+   */
+  t(key, params = {}) {
+    const parts = key.split('.');
+    let str = translations[this.currentLanguage];
+    for (const p of parts) {
+      if (str == null) break;
+      str = str[p];
     }
-    
-    return value || defaultValue;
+    if (typeof str !== 'string') {
+      str = key;
+    }
+    Object.entries(params).forEach(([k, v]) => {
+      str = str.replace(new RegExp(`\\{\\{?${k}\\}?\\}`, 'g'), v);
+    });
+    return str;
   }
 
-  addListener(callback) {
-    this.listeners.push(callback);
+  addListener(cb) {
+    this.listeners.push(cb);
   }
 
-  removeListener(callback) {
-    this.listeners = this.listeners.filter(listener => listener !== callback);
+  removeListener(cb) {
+    this.listeners = this.listeners.filter(fn => fn !== cb);
   }
 
   notifyListeners() {
-    this.listeners.forEach(callback => callback(this.currentLanguage));
+    this.listeners.forEach(fn => fn(this.currentLanguage));
   }
 
   getAvailableLanguages() {
     return [
       { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-      { code: 'en', name: 'English', flag: '🇺🇸' }
+      { code: 'en', name: 'English',    flag: '🇺🇸' }
     ];
   }
 }

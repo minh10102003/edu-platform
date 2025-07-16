@@ -63,7 +63,6 @@ export default function ChatbotAI({ isOpen, onClose, onProductClick, className }
     try {
       await new Promise((resolve) => setTimeout(resolve, 800))
 
-      // Sử dụng API getChatbotResponse trực tiếp cho tất cả các câu hỏi
       const response = await api.getChatbotResponse(currentInput, "")
       let responseText = response.message || "Vui lòng chọn một lĩnh vực cụ thể, ví dụ: 'khóa học tiếng anh'."
       
@@ -75,7 +74,6 @@ export default function ChatbotAI({ isOpen, onClose, onProductClick, className }
       }
       setMessages((prevMessages) => [...prevMessages, botResponse])
 
-      // Hiển thị product card nếu có
       if (response.productSuggestion) {
         setMessages((prevMessages) => [
           ...prevMessages,
