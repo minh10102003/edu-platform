@@ -74,7 +74,7 @@ export default function CartPage({ onRefreshCounts }) {
   const [promoCode, setPromoCode] = useState("")
   const [appliedPromo, setAppliedPromo] = useState(null)
   const [promoError, setPromoError] = useState("")
-  const [checkoutStep, setCheckoutStep] = useState(1) 
+  const [checkoutStep, setCheckoutStep] = useState(1)
   const [orderData, setOrderData] = useState({
     studentName: "",
     email: "",
@@ -308,7 +308,7 @@ export default function CartPage({ onRefreshCounts }) {
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-6">
+    <div className="container mx-auto px-2 sm:px-4 py-6 overflow-x-hidden">
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-start space-x-6 mb-4 overflow-x-auto py-2">
@@ -821,17 +821,18 @@ export default function CartPage({ onRefreshCounts }) {
                     {t("promoCodeTitle")}
                   </h4>
                   <div className="space-y-3">
-                    <div className="flex gap-2">
+                    {/* flex-col trên mobile, row từ sm */}
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         type="text"
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value)}
                         placeholder={t("placeholderPromoCode")}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        className="w-full flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                       />
                       <button
                         onClick={applyPromoCode}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                       >
                         {t("applyPromo")}
                       </button>

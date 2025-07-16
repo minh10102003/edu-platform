@@ -127,7 +127,7 @@ This generates an optimized `dist/` folder, ready to be served by any static hos
 4. **Deploy**
 
    * Netlify will install dependencies, run the build, and publish your site.
-   * On success, you’ll get a live URL like `https://your‑site.netlify.app`.
+   * On success, you’ll get a live URL like `https://edu-commerce.netlify.app/`.
 
 ---
 
