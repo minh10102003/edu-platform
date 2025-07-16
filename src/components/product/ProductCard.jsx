@@ -163,8 +163,8 @@ export default function ProductCard({
         className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 cursor-pointer"
         onClick={() => onViewDetail(product)}
       >
-        <div className="flex">
-          <div className="relative w-48 h-32 flex-shrink-0 overflow-hidden">
+        <div className="flex flex-col sm:flex-row">
+          <div className="relative w-full sm:w-48 h-48 sm:h-32 flex-shrink-0 overflow-hidden">
             {!imageLoaded && !imageError && (
               <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +180,7 @@ export default function ProductCard({
                 setImageError(true)
                 setImageLoaded(true)
               }}
-              className={`w-full h-full object-cover transition-all duration-300 ${
+              className={`w-full h-48 sm:h-60 object-cover transition-all duration-300 ${
                 imageLoaded ? "opacity-100" : "opacity-0"
               }`}
             />
@@ -269,7 +269,7 @@ export default function ProductCard({
             setImageError(true)
             setImageLoaded(true)
           }}
-          className={`w-full h-48 object-cover transition-all duration-500 group-hover:scale-105 ${
+          className={`w-full h-48 sm:h-60 object-cover transition-all duration-500 group-hover:scale-105 ${
             imageLoaded ? "opacity-100" : "opacity-0"
           }`}
         />

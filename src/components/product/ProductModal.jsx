@@ -175,7 +175,7 @@ export default function ProductModal({ product, onClose, onRefreshCounts }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
       <div
         ref={modalRef}
-        className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full flex flex-col lg:flex-row overflow-hidden animate-scale-in max-h-[90vh]"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-xl sm:max-w-4xl flex flex-col lg:flex-row overflow-hidden animate-scale-in max-h-[90vh]"
       >
         {/* Close Button */}
         <button
@@ -190,7 +190,7 @@ export default function ProductModal({ product, onClose, onRefreshCounts }) {
         </button>
 
         {/* Product Image */}
-        <div className="relative lg:w-1/2 min-h-[300px] lg:min-h-[500px]">
+        <div className="relative w-full lg:w-1/2 h-64 sm:h-80 lg:h-auto flex-shrink-0 overflow-hidden">
           {!imageLoaded && !imageError && (
             <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
               <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -416,7 +416,7 @@ export default function ProductModal({ product, onClose, onRefreshCounts }) {
 
           {/* Action Buttons */}
           <div className="border-t border-gray-200 pt-6 mt-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
               <div>
                 <span className="text-3xl font-bold text-blue-600">
                   {formatPrice(product.price)}
