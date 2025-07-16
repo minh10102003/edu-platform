@@ -86,7 +86,6 @@ export default function AISuggestions({ onProductClick, className }) {
       maximumFractionDigits: 0
     }).format(price)
 
-  // Nếu có lỗi và không đang load, hiển thị banner lỗi
   if (error && !loading) {
     return (
       <div className={`bg-white border border-red-200 rounded-xl shadow-lg p-6 w-full ${className}`}>
@@ -128,7 +127,6 @@ export default function AISuggestions({ onProductClick, className }) {
     )
   }
 
-  // Giao diện chính
   return (
     <div className={`bg-white border border-gray-200 rounded-xl shadow-lg w-full ${className}`}>
       {/* Header */}
