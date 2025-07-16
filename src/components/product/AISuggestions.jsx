@@ -87,7 +87,7 @@ export default function AISuggestions({ onProductClick, className }) {
 
   if (error && !loading) {
     return (
-      <div className={`bg-white border border-red-200 rounded-xl shadow-lg p-6 ${className}`}>
+      <div className={`bg-white border border-red-200 rounded-xl shadow-lg p-6 w-full max-w-xs sm:max-w-md ${className}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
@@ -184,7 +184,7 @@ export default function AISuggestions({ onProductClick, className }) {
               ))}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 overflow-y-auto max-h-[300px] sm:max-h-[400px]">
               {suggestions.map((product, index) => (
                 <div
                   key={product.id}
@@ -273,7 +273,7 @@ export default function AISuggestions({ onProductClick, className }) {
           
           {/* Actions */}
           {!loading && suggestions.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-gray-100 flex gap-3">
+            <div className="mt-6 pt-4 border-t flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={() => loadSuggestions()}
                 className="flex-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium flex items-center justify-center gap-2"

@@ -149,8 +149,9 @@ export default function ChatbotAI({ isOpen, onClose, onProductClick, className }
   if (!isOpen) return null
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
-      <div className={`bg-white rounded-2xl shadow-2xl border border-gray-200 transition-all duration-300 ${isMinimized ? 'w-80 h-16' : 'w-96 h-[500px]'} flex flex-col`}>
+    <div className={`fixed inset-x-2 bottom-4 z-50 flex justify-end ${className}`}>
+      <div className={`bg-white rounded-2xl shadow-2xl border border-gray-200 transition-all duration-300 ${isMinimized ? 'w-full max-w-xs h-16'
+    : 'w-full max-w-xs h-[400px] sm:max-w-md sm:h-[500px]'} flex flex-col`}>
         <div className="bg-blue-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
@@ -273,7 +274,7 @@ export default function ChatbotAI({ isOpen, onClose, onProductClick, className }
             </div>
 
             <div className="p-4 border-t border-gray-100">
-              <form onSubmit={handleSendMessage} className="flex items-end gap-3">
+              <form onSubmit={handleSendMessage} className="flex flex-col sm:flex-row items-end gap-2 sm:gap-3">
                 <div className="flex-1">
                   <input
                     ref={inputRef}

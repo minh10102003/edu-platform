@@ -308,10 +308,10 @@ export default function CartPage({ onRefreshCounts }) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-2 sm:px-4 py-6">
       {/* Progress Steps */}
       <div className="mb-8">
-        <div className="flex items-center justify-center space-x-8 mb-4">
+        <div className="flex items-center justify-start space-x-6 mb-4 overflow-x-auto py-2">
           {[
             { step: 1, title: t("stepCart") },
             { step: 2, title: t("stepInfo") },
@@ -388,7 +388,7 @@ export default function CartPage({ onRefreshCounts }) {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 animate-fade-in">
             {checkoutStep === 1 && (
@@ -785,7 +785,7 @@ export default function CartPage({ onRefreshCounts }) {
 
           {/* Sidebar */}
           {checkoutStep !== 4 && (
-            <div className="bg-white rounded-xl shadow-lg p-6 h-fit sticky top-8 animate-fade-in">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 sticky top-4 sm:top-8 w-full lg:w-auto animate-fade-in">
               <h3 className="text-xl font-bold text-gray-800 mb-6">
                 {t("orderSummary")}
               </h3>

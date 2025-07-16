@@ -192,6 +192,7 @@ const translations = {
     availablePromoTitle: "Mã khuyến mãi có sẵn:",
     selectedCourses: "Khóa học đã chọn",
     clearAllCart: "Xóa tất cả",
+    featureRefund: "Chính sách hoàn tiền",
 
     cartPageHeader: "Giỏ hàng của bạn",
     infoPageHeader: "Thông tin học viên",
@@ -476,6 +477,7 @@ const translations = {
     availablePromoTitle: "Available Promo Codes:",
     selectedCourses: "Selected Courses",
     clearAllCart: "Clear all",
+    featureRefund: "Refund Policy",
 
     cartPageHeader: "Your Cart",
     infoPageHeader: "Student Information",
