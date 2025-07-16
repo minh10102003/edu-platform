@@ -6,18 +6,42 @@ import ProductCard from "../components/product/ProductCard.jsx"
 import ProductModal from "../components/product/ProductModal.jsx"
 import { api } from "../services/api.js"
 
+// Toast notification system
+const createToast = (message, type = "default") => {
+  const toast = document.createElement("div")
+  const icon = type === "success" ? "✓" : type === "error" ? "⚠" : type === "info" ? "ℹ" : "✓"
+  const bgColor = {
+    success: "bg-emerald-500",
+    error: "bg-red-500",
+    info: "bg-blue-500",
+    default: "bg-gray-800"
+  }[type]
+
+  toast.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-slide-down flex items-center gap-2 max-w-sm`
+  toast.innerHTML = `
+    <span class="text-sm font-medium">${icon}</span>
+    <span class="text-sm">${message}</span>
+  `
+  
+  document.body.appendChild(toast)
+  setTimeout(() => {
+    toast.style.animation = "fadeOut 0.3s ease-out forwards"
+    setTimeout(() => toast.remove(), 300)
+  }, 3000)
+}
+
 export default function FavoritesPage({ onRefreshCounts }) {
   const [favoriteProductIds, setFavoriteProductIds] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedProduct, setSelectedProduct] = useState(null)
-  const [viewMode, setViewMode] = useState("grid") // 'grid' or 'list'
-  const [sortOrder, setSortOrder] = useState("default") // 'default', 'price-asc', 'price-desc', 'rating-desc'
+  const [viewMode, setViewMode] = useState("grid")
+  const [sortOrder, setSortOrder] = useState("default")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
 
-  // States for inline confirmation dialog
+  // Confirmation dialog state
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [confirmTitle, setConfirmTitle] = useState("")
   const [confirmMessage, setConfirmMessage] = useState("")
@@ -44,47 +68,17 @@ export default function FavoritesPage({ onRefreshCounts }) {
     return allProducts.filter((product) => favoriteProductIds.includes(product.id))
   }, [allProducts, favoriteProductIds])
 
-  const handleToggleFavorite = (productId, isFavorite) => {
-    if (!isFavorite) {
-      setFavoriteProductIds((prev) => prev.filter((id) => id !== productId))
-    } else {
-      setFavoriteProductIds((prev) => [...prev, productId])
-    }
-    onRefreshCounts()
-  }
-
   const handleClearFavoritesClick = () => {
-    setConfirmTitle("Xác nhận xóa yêu thích")
-    setConfirmMessage("Bạn có chắc chắn muốn xóa toàn bộ danh sách yêu thích không?")
+    setConfirmTitle("Xóa tất cả yêu thích")
+    setConfirmMessage("Bạn có chắc chắn muốn xóa toàn bộ danh sách yêu thích không? Hành động này không thể hoàn tác.")
     setConfirmAction(() => () => {
-      const clearedFavorites = storage.clearFavorites()
-      setFavoriteProductIds(clearedFavorites)
-      showToast("Đã xóa toàn bộ danh sách yêu thích", "success")
+      storage.clearFavorites()
+      setFavoriteProductIds([])
+      createToast("Đã xóa toàn bộ danh sách yêu thích", "success")
       onRefreshCounts()
       setShowConfirmDialog(false)
     })
     setShowConfirmDialog(true)
-  }
-
-  const showToast = (message, type = "default") => {
-    const toast = document.createElement("div")
-    const bgColor =
-      type === "success"
-        ? "bg-green-500"
-        : type === "error"
-          ? "bg-red-500"
-          : type === "info"
-            ? "bg-blue-500"
-            : "bg-gray-800"
-    toast.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up flex items-center gap-2`
-    toast.innerHTML = `
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-      </svg>
-      ${message}
-    `
-    document.body.appendChild(toast)
-    setTimeout(() => toast.remove(), 3000)
   }
 
   const handleViewDetail = (product) => {
@@ -95,322 +89,350 @@ export default function FavoritesPage({ onRefreshCounts }) {
     setSelectedProduct(null)
   }
 
+  const handleAddAllToCart = () => {
+    let addedCount = 0
+    favoriteProducts.forEach(product => {
+      if (!storage.isInCart(product.id)) {
+        storage.addToCart(product)
+        addedCount++
+      }
+    })
+    
+    if (addedCount > 0) {
+      createToast(`Đã thêm ${addedCount} khóa học vào giỏ hàng`, "success")
+      onRefreshCounts()
+    } else {
+      createToast("Tất cả khóa học đã có trong giỏ hàng", "info")
+    }
+  }
+
   const filteredAndSortedFavorites = useMemo(() => {
     const filtered = favoriteProducts.filter((product) => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesCategory =
-        categoryFilter === "all" || product.category.toLowerCase() === categoryFilter.toLowerCase()
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           product.shortDescription.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesCategory = categoryFilter === "all" || 
+                             product.category.toLowerCase() === categoryFilter.toLowerCase()
       return matchesSearch && matchesCategory
     })
 
-    if (sortOrder === "price-asc") {
-      filtered.sort((a, b) => a.price - b.price)
-    } else if (sortOrder === "price-desc") {
-      filtered.sort((a, b) => b.price - a.price)
-    } else if (sortOrder === "rating-desc") {
-      filtered.sort((a, b) => b.rating - a.rating)
-    }
-    return filtered
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortOrder) {
+        case "price-asc":
+          return a.price - b.price
+        case "price-desc":
+          return b.price - a.price
+        case "rating-desc":
+          return b.rating - a.rating
+        case "name-asc":
+          return a.name.localeCompare(b.name)
+        case "newest":
+          return b.id - a.id // Assuming higher ID means newer
+        default:
+          return 0
+      }
+    })
+
+    return sorted
   }, [favoriteProducts, searchTerm, categoryFilter, sortOrder])
 
   const categories = useMemo(() => {
     return ["all", ...new Set(allProducts.map((p) => p.category))]
   }, [allProducts])
 
+  // Statistics
   const totalFavorites = favoriteProducts.length
   const totalPrice = favoriteProducts.reduce((sum, p) => sum + p.price, 0)
-  const avgRating =
-    favoriteProducts.length > 0
-      ? (favoriteProducts.reduce((sum, p) => sum + p.rating, 0) / favoriteProducts.length).toFixed(1)
-      : "N/A"
+  const avgRating = favoriteProducts.length > 0 
+    ? (favoriteProducts.reduce((sum, p) => sum + p.rating, 0) / favoriteProducts.length).toFixed(1)
+    : "0"
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("vi-VN", { 
+      style: "currency", 
+      currency: "VND" 
+    }).format(price)
+  }
+
+  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1)
+
+  const clearFilters = () => {
+    setSearchTerm("")
+    setCategoryFilter("all")
+    setSortOrder("default")
+  }
 
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Đang tải danh sách yêu thích...</p>
+        </div>
       </div>
     )
   }
 
   if (error) {
-    return <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center text-red-600 text-lg">{error}</div>
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+            <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Có lỗi xảy ra</h3>
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200"
+            >
+              Thử lại
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-extrabold text-gray-900 mb-8 text-center animate-fade-in-up">
-        Khóa học yêu thích của bạn
-      </h1>
+      {/* Header */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 animate-fade-in-up">
+          Khóa học{" "}
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">yêu thích</span>
+        </h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto animate-fade-in-up animation-delay-200">
+          Tập hợp những khóa học bạn quan tâm nhất để theo dõi và đăng ký khi phù hợp
+        </p>
+      </div>
 
       {favoriteProducts.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-lg p-8 text-center text-gray-600 text-lg">
-          Bạn chưa có khóa học yêu thích nào. Hãy khám phá và thêm vào nhé!
+        <div className="text-center py-12">
+          <div className="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
+            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Chưa có khóa học yêu thích</h3>
+            <p className="text-gray-600 mb-6">Hãy khám phá và thêm các khóa học bạn quan tâm vào danh sách yêu thích!</p>
+            <a
+              href="/"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 inline-block font-medium"
+            >
+              Khám phá khóa học
+            </a>
+          </div>
         </div>
       ) : (
         <>
           {/* Statistics Dashboard */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-sm opacity-80 mb-1">Tổng số khóa học</p>
-              <p className="text-4xl font-bold">{totalFavorites}</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-fade-in">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">{totalFavorites}</p>
+              <p className="text-sm text-gray-600">Khóa học yêu thích</p>
             </div>
-            <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-sm text-gray-600 mb-1">Tổng giá trị</p>
-              <p className="text-3xl font-bold text-blue-600">
-                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(totalPrice)}
-              </p>
+            
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+              <p className="text-lg font-bold text-gray-900 mb-1">{formatPrice(totalPrice)}</p>
+              <p className="text-sm text-gray-600">Tổng giá trị</p>
             </div>
-            <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center text-center transform hover:scale-105 transition-transform duration-300">
-              <p className="text-sm text-gray-600 mb-1">Đánh giá trung bình</p>
-              <p className="text-3xl font-bold text-yellow-500">{avgRating} ★</p>
+            
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">{avgRating} ★</p>
+              <p className="text-sm text-gray-600">Đánh giá trung bình</p>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">{new Set(favoriteProducts.map(p => p.category)).size}</p>
+              <p className="text-sm text-gray-600">Danh mục khác nhau</p>
             </div>
           </div>
 
-          {/* Filters, Sort & View Mode */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 animate-fade-in">
-            <div className="w-full md:w-1/3 relative">
-              <input
-                type="text"
-                placeholder="Tìm kiếm khóa học..."
-                className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 pl-12"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <svg
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          {/* Filters and Controls */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 animate-fade-in">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+              {/* Search */}
+              <div className="w-full lg:w-1/3 relative">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm khóa học yêu thích..."
+                  className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 pl-12 text-gray-700"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
-              </svg>
-            </div>
+                <svg
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
 
-            <div className="w-full md:w-1/3">
-              <select
-                className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white appearance-none"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category === "all" ? "Tất cả danh mục" : capitalize(category)}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Category Filter */}
+              <div className="w-full lg:w-1/4">
+                <select
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-700"
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category === "all" ? "Tất cả danh mục" : capitalize(category)}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="w-full md:w-1/3 flex items-center gap-4">
-              <select
-                className="flex-grow px-5 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white appearance-none"
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-              >
-                <option value="default">Sắp xếp mặc định</option>
-                <option value="price-asc">Giá: Thấp đến Cao</option>
-                <option value="price-desc">Giá: Cao đến Thấp</option>
-                <option value="rating-desc">Đánh giá: Cao nhất</option>
-              </select>
-              <div className="flex-shrink-0 flex space-x-2">
+              {/* Sort Order */}
+              <div className="w-full lg:w-1/4">
+                <select
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-700"
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                >
+                  <option value="default">Mặc định</option>
+                  <option value="newest">Mới nhất</option>
+                  <option value="name-asc">Tên A-Z</option>
+                  <option value="price-asc">Giá thấp đến cao</option>
+                  <option value="price-desc">Giá cao đến thấp</option>
+                  <option value="rating-desc">Đánh giá cao nhất</option>
+                </select>
+              </div>
+
+              {/* View Mode & Actions */}
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-3 rounded-lg transition-colors ${
-                    viewMode === "grid"
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    viewMode === "grid" ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600"
                   }`}
-                  aria-label="Grid View"
+                  aria-label="Xem dạng lưới"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                   </svg>
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-3 rounded-lg transition-colors ${
-                    viewMode === "list"
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600"
                   }`}
-                  aria-label="List View"
+                  aria-label="Xem dạng danh sách"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                   </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>Hiển thị <span className="font-semibold">{filteredAndSortedFavorites.length}</span> / {totalFavorites} khóa học</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {(searchTerm || categoryFilter !== "all" || sortOrder !== "default") && (
+                  <button
+                    onClick={clearFilters}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 text-sm"
+                  >
+                    Xóa bộ lọc
+                  </button>
+                )}
+                
+                <button
+                  onClick={handleAddAllToCart}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
+                >
+                  Thêm tất cả vào giỏ
+                </button>
+                
+                <button
+                  onClick={handleClearFavoritesClick}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
+                >
+                  Xóa tất cả
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Clear Favorites Button */}
-          <div className="mb-6 text-right">
-            <button
-              onClick={handleClearFavoritesClick}
-              className="px-6 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
-            >
-              Xóa toàn bộ yêu thích
-            </button>
-          </div>
-
-          {/* Product Display */}
-          <div
-            className={
-              viewMode === "grid"
-                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
-                : "grid grid-cols-1 gap-6"
-            }
-          >
-            {filteredAndSortedFavorites.map((product) =>
-              viewMode === "grid" ? (
+          {/* Results */}
+          {filteredAndSortedFavorites.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="bg-gray-50 rounded-lg p-8 max-w-md mx-auto">
+                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Không tìm thấy khóa học nào</h3>
+                <p className="text-gray-600 mb-4">Thử điều chỉnh bộ lọc hoặc tìm kiếm từ khóa khác</p>
+                <button
+                  onClick={clearFilters}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Xóa bộ lọc
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className={`${
+              viewMode === "grid" 
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                : "space-y-4"
+            } animate-stagger`}>
+              {filteredAndSortedFavorites.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   onViewDetail={handleViewDetail}
-                  onToggleFavorite={handleToggleFavorite}
                   onRefreshCounts={onRefreshCounts}
+                  viewMode={viewMode}
                 />
-              ) : (
-                <div
-                  key={product.id}
-                  className="flex flex-col md:flex-row bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
-                >
-                  <div className="relative w-full md:w-1/3 h-48 md:h-auto flex-shrink-0">
-                    <img
-                      src={`/images/${product.category.toLowerCase()}.jpg` || "/placeholder.svg"}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border backdrop-blur-sm ${getCategoryColor(
-                          product.category,
-                        )}`}
-                      >
-                        {capitalize(product.category)}
-                      </span>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleToggleFavorite(product.id, !storage.isFavorite(product.id))
-                      }}
-                      className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110 ${
-                        storage.isFavorite(product.id)
-                          ? "bg-red-500 text-white shadow-lg"
-                          : "bg-white/90 text-gray-600 hover:bg-white hover:text-red-500"
-                      }`}
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill={storage.isFavorite(product.id) ? "currentColor" : "none"}
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="p-5 flex-grow flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-bold text-xl mb-2 line-clamp-2 text-gray-900 hover:text-blue-600 transition-colors">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-3 leading-relaxed">
-                        {product.shortDescription}
-                      </p>
-                      <div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                          </svg>
-                          <span className="font-medium">{product.instructor}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                          <span>{product.duration}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                          <span className="font-semibold text-sm text-gray-900">{product.rating}</span>
-                          <span className="text-gray-400 text-xs">({product.reviews})</span>
-                        </div>
-                        {getLevelIcon(product.level)}
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-2xl font-bold text-blue-600">
-                          {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(product.price)}
-                        </span>
-                        <button
-                          onClick={() => handleViewDetail(product)}
-                          className="mt-2 px-4 py-2 rounded-lg font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors flex items-center gap-2 whitespace-nowrap"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                          <span className="whitespace-nowrap">Xem chi tiết</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ),
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </>
       )}
 
+      {/* Product Modal */}
       {selectedProduct && (
-        <ProductModal product={selectedProduct} onClose={handleCloseModal} onRefreshCounts={onRefreshCounts} />
+        <ProductModal 
+          product={selectedProduct} 
+          onClose={handleCloseModal} 
+          onRefreshCounts={onRefreshCounts} 
+        />
       )}
 
-      {/* Inline Confirm Dialog */}
+      {/* Confirmation Dialog */}
       {showConfirmDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm transform scale-95 animate-scale-in">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm animate-scale-in">
             <h3 className="text-xl font-bold text-gray-900 mb-4">{confirmTitle}</h3>
             <p className="text-gray-700 mb-6">{confirmMessage}</p>
             <div className="flex justify-end gap-3">
@@ -430,62 +452,6 @@ export default function FavoritesPage({ onRefreshCounts }) {
           </div>
         </div>
       )}
-    </div>
-  )
-}
-
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1)
-
-const getCategoryColor = (category) => {
-  const colors = {
-    art: "bg-pink-100 text-pink-700 border-pink-200",
-    business: "bg-blue-100 text-blue-700 border-blue-200",
-    design: "bg-purple-100 text-purple-700 border-purple-200",
-    music: "bg-green-100 text-green-700 border-green-200",
-    programming: "bg-orange-100 text-orange-700 border-orange-200",
-    photography: "bg-indigo-100 text-indigo-700 border-indigo-200",
-    marketing: "bg-red-100 text-red-700 border-red-200",
-    english: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    finance: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    health: "bg-teal-100 text-teal-700 border-teal-200",
-  }
-  return colors[category.toLowerCase()] || "bg-gray-100 text-gray-700 border-gray-200"
-}
-
-const getLevelIcon = (level) => {
-  if (level.toLowerCase().includes("beginner")) {
-    return (
-      <div className="flex items-center gap-1 text-green-600">
-        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-        <span className="text-xs font-medium">Cơ bản</span>
-      </div>
-    )
-  }
-  if (level.toLowerCase().includes("intermediate")) {
-    return (
-      <div className="flex items-center gap-1 text-yellow-600">
-        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-        <span className="text-xs font-medium">Trung cấp</span>
-      </div>
-    )
-  }
-  if (level.toLowerCase().includes("advanced")) {
-    return (
-      <div className="flex items-center gap-1 text-red-600">
-        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-        <span className="text-xs font-medium">Nâng cao</span>
-      </div>
-    )
-  }
-  return (
-    <div className="flex items-center gap-1 text-blue-600">
-      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-      <div className="w-2 h-2 bg-blue-300 rounded-full"></div>
-      <div className="w-2 h-2 bg-blue-300 rounded-full"></div>
-      <span className="text-xs font-medium">Tất cả</span>
     </div>
   )
 }

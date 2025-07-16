@@ -1,12 +1,9 @@
-import { storage } from "../utils/storage.js" // Added .js extension
+import { storage } from "../utils/storage.js"
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 const shouldFail = () => Math.random() < 0.1
 let _productsCache = null
 
-/**
- * Internal helper: fetch and cache products.json
- */
 async function fetchProducts() {
   if (_productsCache === null) {
     const response = await fetch("/api/products.json")
@@ -19,31 +16,22 @@ async function fetchProducts() {
 }
 
 export const api = {
-  /**
-   * Lấy danh sách tất cả sản phẩm
-   */
   getProducts: async () => {
     await delay(500)
     const data = await fetchProducts()
     return { data }
   },
 
-  /**
-   * Lấy chi tiết một sản phẩm theo ID
-   */
   getProductById: async (id) => {
     await delay(300)
     const products = await fetchProducts()
-    const found = products.find((p) => p.id === id) // Assuming ID is already correct type
+    const found = products.find((p) => p.id === id)
     if (!found) {
       throw new Error("Không tìm thấy khóa học")
     }
     return { data: found }
   },
 
-  /**
-   * Tìm kiếm sản phẩm theo tên hoặc mô tả ngắn
-   */
   searchProducts: async (query) => {
     await delay(400)
     const products = await fetchProducts()
@@ -59,9 +47,6 @@ export const api = {
     return { data: filtered }
   },
 
-  /**
-   * Lọc sản phẩm theo khoảng giá
-   */
   filterByPrice: async (minPrice, maxPrice) => {
     await delay(400)
     const products = await fetchProducts()
@@ -69,18 +54,15 @@ export const api = {
     return { data: filtered }
   },
 
-  /**
-   * Gợi ý AI nâng cao (dùng chung products.json, không cần file riêng)
-   */
-  getSuggestions: async (userId) => {
+  getSuggestions: async () => {
     await delay(800)
     if (shouldFail()) {
       throw new Error("AI Service tạm thời không khả dụng")
     }
     const products = await fetchProducts()
-    const history = storage.getHistory() || [] // This is view history
+    const history = storage.getHistory() || []
     const favoriteIds = storage.getFavorites() || []
-    const cartEntries = storage.getCart() || [] // Corrected: use getCart()
+    const cartEntries = storage.getCart() || []
     const behavior = storage.getUserBehavior() || {}
     const searchHistory = behavior.searchHistory || []
 
@@ -90,12 +72,12 @@ export const api = {
       freq[cat] = (freq[cat] || 0) + 1
     }
 
-    history.forEach((h) => recordCategory(h.product.category)) // Use h.product.category
+    history.forEach((h) => recordCategory(h.product.category))
     favoriteIds.forEach((id) => {
       const p = products.find((x) => x.id === id)
       if (p) recordCategory(p.category)
     })
-    cartEntries.forEach((item) => recordCategory(item.product.category)) // Use item.product.category
+    cartEntries.forEach((item) => recordCategory(item.product.category))
     searchHistory.forEach((s) => {
       const p = products.find((x) => x.name.toLowerCase().includes(s.query.toLowerCase()))
       if (p) recordCategory(p.category)
@@ -108,9 +90,9 @@ export const api = {
     const topCat = catsSorted[0] || null
 
     const exclude = new Set([
-      ...history.map((h) => h.product.id), // Use h.product.id
+      ...history.map((h) => h.product.id),
       ...favoriteIds,
-      ...cartEntries.map((item) => item.product.id), // Use item.product.id
+      ...cartEntries.map((item) => item.product.id),
     ])
 
     let suggestions = []
@@ -137,14 +119,10 @@ export const api = {
     }
   },
 
-  /**
-   * Content-based filtering suggestions
-   */
   getContentBasedSuggestions: async (preferences, history) => {
-    // Added async
     const suggestions = []
     const recentlyViewed = history.slice(0, 5).map((h) => h.product)
-    const products = await fetchProducts() // Ensure products are fetched
+    const products = await fetchProducts()
     products.forEach((product) => {
       let score = 0
       if (preferences.preferredCategories.includes(product.category)) score += 0.4
@@ -160,12 +138,8 @@ export const api = {
     return suggestions.sort((a, b) => b.score - a.score).slice(0, 5)
   },
 
-  /**
-   * Mock collaborative filtering suggestions
-   */
   getCollaborativeFilteringSuggestions: async (userId) => {
-    // Added async
-    const products = await fetchProducts() // Ensure products are fetched
+    const products = await fetchProducts()
     const group = Number.parseInt(userId.slice(-1), 10) % 3
     const prefs = {
       0: ["programming", "english"],
@@ -183,12 +157,8 @@ export const api = {
       .slice(0, 3)
   },
 
-  /**
-   * Trending suggestions (high review count)
-   */
   getTrendingSuggestions: async (preferences) => {
-    // Added async
-    const products = await fetchProducts() // Ensure products are fetched
+    const products = await fetchProducts()
     return products
       .filter((p) => preferences.preferredCategories.includes(p.category) || p.reviews > 300)
       .map((product) => ({
@@ -200,60 +170,258 @@ export const api = {
       .slice(0, 3)
   },
 
-  /**
-   * Popular products for new users
-   */
   getPopularProducts: async () => {
-    // Added async
-    const products = await fetchProducts() // Ensure products are fetched
+    const products = await fetchProducts()
     return products.sort((a, b) => b.rating * b.reviews - a.rating * a.reviews).slice(0, 3)
   },
 
-  /**
-   * Lấy sản phẩm theo category
-   */
   getProductsByCategory: async (category) => {
     await delay(400)
     const products = await fetchProducts()
-    const filtered = products.filter((p) => p.category === category)
+    const filtered = products.filter((p) => p.category.toLowerCase() === category.toLowerCase())
     return { data: filtered }
   },
 
-  /**
-   * Mock Chatbot Response (re-added)
-   */
-  getChatbotResponse: async (message, context) => {
-    await delay(700) // Simulate network delay
+  getChatbotResponse: async (message) => {
+    await delay(700)
     const products = await fetchProducts()
-    let responseMessage = "Tôi không chắc chắn về điều đó. Bạn có thể hỏi rõ hơn không?"
+    let responseMessage = ""
     let productSuggestion = null
 
     const lowerCaseMessage = message.toLowerCase()
+    const allCategories = [...new Set(products.map(p => p.category.toLowerCase()))]
 
-    if (lowerCaseMessage.includes("chào") || lowerCaseMessage.includes("xin chào")) {
-      responseMessage = "Chào bạn! Tôi là trợ lý AI của EduCommerce. Tôi có thể giúp gì cho bạn hôm nay?"
-    } else if (lowerCaseMessage.includes("khóa học") && lowerCaseMessage.includes("lập trình")) {
-      const programmingCourses = products.filter((p) => p.category.toLowerCase() === "programming")
-      if (programmingCourses.length > 0) {
-        responseMessage = `Chúng tôi có một số khóa học lập trình tuyệt vời như "${programmingCourses[0].name}". Bạn có muốn tìm hiểu thêm không?`
-        productSuggestion = programmingCourses[0]
+    // XỬ LÝ CÁC PATTERN KHÓA HỌC CỤ THỂ
+    // Pattern 1: "khóa học [exact_tag]"
+    const exactTagPattern = /khóa học\s+(art|business|design|music|programming|photography|marketing|english|finance|health)/i
+    let match = lowerCaseMessage.match(exactTagPattern)
+    
+    if (match) {
+      const requestedTag = match[1].toLowerCase()
+      const courses = products.filter(p => p.category.toLowerCase() === requestedTag)
+      if (courses.length > 0) {
+        responseMessage = `Danh sách các khóa học ${requestedTag} (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { 
+            style: "currency", 
+            currency: "VND", 
+            minimumFractionDigits: 0 
+          }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+        return { message: responseMessage, productSuggestion }
       } else {
-        responseMessage =
-          "Hiện tại chúng tôi không có khóa học lập trình nào. Bạn có muốn tìm kiếm danh mục khác không?"
+        responseMessage = `Hiện tại không có khóa học ${requestedTag} nào.`
+        return { message: responseMessage, productSuggestion }
+      }
+    }
+
+    // Pattern 2: "khóa học [vietnamese_keywords]"
+    const vietnameseKeywords = {
+      'tiếng anh': 'english',
+      'anh ngữ': 'english',
+      'kinh doanh': 'business', 
+      'lập trình': 'programming',
+      'thiết kế': 'design',
+      'nghệ thuật': 'art',
+      'âm nhạc': 'music',
+      'nhiếp ảnh': 'photography',
+      'tiếp thị': 'marketing',
+      'tài chính': 'finance',
+      'sức khỏe': 'health'
+    }
+
+    for (const [vietnameseKey, englishTag] of Object.entries(vietnameseKeywords)) {
+      if (lowerCaseMessage.includes(`khóa học ${vietnameseKey}`)) {
+        const courses = products.filter(p => p.category.toLowerCase() === englishTag)
+        if (courses.length > 0) {
+          responseMessage = `Danh sách các khóa học ${englishTag} (${courses.length} khóa học):`
+          courses.forEach((course, index) => {
+            const price = new Intl.NumberFormat("vi-VN", { 
+              style: "currency", 
+              currency: "VND", 
+              minimumFractionDigits: 0 
+            }).format(course.price)
+            responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+          })
+          productSuggestion = courses[0]
+          return { message: responseMessage, productSuggestion }
+        } else {
+          responseMessage = `Hiện tại không có khóa học ${englishTag} nào.`
+          return { message: responseMessage, productSuggestion }
+        }
+      }
+    }
+
+    // XỬ LÝ CÁC CÂU HỎI VỀ DANH SÁCH KHÓA HỌC CÓ SẴN
+    if (lowerCaseMessage.includes("bạn đang có những khóa học nào") || 
+        lowerCaseMessage.includes("các khóa học đang có") ||
+        lowerCaseMessage.includes("có những khóa học gì") ||
+        lowerCaseMessage.includes("tất cả khóa học") || 
+        lowerCaseMessage.includes("khóa học bạn đang có") || 
+        lowerCaseMessage.includes("gợi ý các khóa học bạn đang có") ||
+        lowerCaseMessage.includes("danh sách khóa học") ||
+        lowerCaseMessage.includes("những khóa học nào")) {
+      
+      const categoriesWithCount = allCategories.map(cat => {
+        const count = products.filter(p => p.category.toLowerCase() === cat).length
+        return `• ${cat.charAt(0).toUpperCase() + cat.slice(1)}: ${count} khóa học`
+      })
+      
+      responseMessage = `Hiện tại chúng tôi có các danh mục khóa học sau:\n\n${categoriesWithCount.join('\n')}\n\nTổng cộng: ${products.length} khóa học\n\nHãy hỏi cụ thể về danh mục bạn quan tâm, ví dụ: "khóa học programming"`
+      
+      // Gợi ý khóa học phổ biến nhất
+      const popularCourse = products.sort((a, b) => b.rating * b.reviews - a.rating * a.reviews)[0]
+      if (popularCourse) {
+        productSuggestion = popularCourse
+      }
+      
+      return { message: responseMessage, productSuggestion }
+    }
+
+    // XỬ LÝ CÁC CÂU HỎI KHÁC
+    if (lowerCaseMessage.includes("chào") || lowerCaseMessage.includes("xin chào")) {
+      responseMessage = "Chào bạn! 👋 Tôi là trợ lý AI của EduCommerce. Tôi có thể giúp gì cho bạn hôm nay?"
+    } else if (lowerCaseMessage.includes("cho tôi danh sách các khóa học về tiếng anh")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "english")
+      if (courses.length > 0) {
+        responseMessage = `Danh sách các khóa học tiếng Anh (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học tiếng Anh nào."
+      }
+    } else if (lowerCaseMessage.includes("gợi ý khóa học lập trình nào hay")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "programming")
+      if (courses.length > 0) {
+        responseMessage = `Danh sách khóa học lập trình hay (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học lập trình nào."
+      }
+    } else if (lowerCaseMessage.includes("tôi muốn xem các khóa học về thiết kế")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "design")
+      if (courses.length > 0) {
+        responseMessage = `Các khóa học thiết kế (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học thiết kế nào."
+      }
+    } else if (lowerCaseMessage.includes("có khóa học nào về kinh doanh không")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "business")
+      if (courses.length > 0) {
+        responseMessage = `Có, danh sách khóa học kinh doanh (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học kinh doanh nào."
+      }
+    } else if (lowerCaseMessage.includes("liệt kê các khóa học nhiếp ảnh")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "photography")
+      if (courses.length > 0) {
+        responseMessage = `Danh sách khóa học nhiếp ảnh (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học nhiếp ảnh nào."
+      }
+    } else if (lowerCaseMessage.includes("khóa học marketing nào đang có trên trang web")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "marketing")
+      if (courses.length > 0) {
+        responseMessage = `Khóa học marketing đang có (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học marketing nào."
+      }
+    } else if (lowerCaseMessage.includes("cho tôi xem các khóa học về sức khỏe")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "health")
+      if (courses.length > 0) {
+        responseMessage = `Các khóa học sức khỏe (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học sức khỏe nào."
+      }
+    } else if (lowerCaseMessage.includes("tôi muốn học về tài chính, có khóa học nào phù hợp")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "finance")
+      if (courses.length > 0) {
+        responseMessage = `Khóa học tài chính phù hợp (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học tài chính nào."
+      }
+    } else if (lowerCaseMessage.includes("gợi ý khóa học nghệ thuật nào tốt")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "art")
+      if (courses.length > 0) {
+        responseMessage = `Gợi ý khóa học nghệ thuật tốt (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học nghệ thuật nào."
+      }
+    } else if (lowerCaseMessage.includes("có khóa học âm nhạc nào không")) {
+      const courses = products.filter(p => p.category.toLowerCase() === "music")
+      if (courses.length > 0) {
+        responseMessage = `Có, danh sách khóa học âm nhạc (${courses.length} khóa học):`
+        courses.forEach((course, index) => {
+          const price = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", minimumFractionDigits: 0 }).format(course.price)
+          responseMessage += `\n${index + 1}. "${course.name}" - ${price}`
+        })
+        productSuggestion = courses[0]
+      } else {
+        responseMessage = "Hiện tại không có khóa học âm nhạc nào."
       }
     } else if (lowerCaseMessage.includes("giá") || lowerCaseMessage.includes("bao nhiêu")) {
-      responseMessage = "Bạn muốn hỏi giá của khóa học nào? Vui lòng cho tôi biết tên khóa học."
+      responseMessage = "Bạn muốn hỏi giá của khóa học nào? Vui lòng cho tôi biết tên khóa học hoặc danh mục."
     } else if (lowerCaseMessage.includes("cảm ơn")) {
-      responseMessage = "Không có gì! Rất vui được giúp đỡ."
+      responseMessage = "Không có gì! Rất vui được giúp đỡ bạn. 😊"
     } else if (lowerCaseMessage.includes("giỏ hàng")) {
-      responseMessage = `Bạn có ${storage.getCartItemsCount()} sản phẩm trong giỏ hàng.` // Use new storage method
+      responseMessage = `Bạn có ${storage.getCartItemsCount()} sản phẩm trong giỏ hàng.`
     } else if (lowerCaseMessage.includes("yêu thích")) {
       responseMessage = `Bạn có ${storage.getFavorites().length} sản phẩm yêu thích.`
-    } else if (lowerCaseMessage.includes("tất cả khóa học")) {
-      responseMessage = `Chúng tôi có tổng cộng ${products.length} khóa học. Bạn có thể xem chúng trên trang chủ.`
     } else {
-      responseMessage =
-        "Tôi đang học hỏi để hiểu rõ hơn các yêu cầu của bạn. Bạn có thể thử hỏi về một danh mục cụ thể như 'khóa học thiết kế' hoặc 'khóa học tiếng anh' không?"
+      // Câu trả lời mặc định với gợi ý
+      responseMessage = "Tôi có thể giúp bạn tìm khóa học theo các danh mục sau:\n\n" + 
+        allCategories.map(cat => `• ${cat.charAt(0).toUpperCase() + cat.slice(1)}`).join('\n') + 
+        "\n\nVí dụ: 'khóa học programming' hoặc 'khóa học tiếng anh'"
+      
+      // Gợi ý khóa học phổ biến
+      const popularCourses = products.sort((a, b) => b.rating * b.reviews - a.rating * a.reviews)
+      if (popularCourses.length > 0) {
+        productSuggestion = popularCourses[0]
+      }
     }
 
     return { message: responseMessage, productSuggestion }
